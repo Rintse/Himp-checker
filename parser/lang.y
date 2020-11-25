@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "../include/node.h"
+#include"z3++.h"
 
 /* Prototypes */
 static void yyerror(const char *);
@@ -40,6 +41,7 @@ extern int lineno;        /* Current line number */
 %union {
   char *idStr;
   char *numStr;
+  z3::expr *exp;
   Node* node;
 }
 
@@ -62,18 +64,19 @@ BExp:           BTRUE | BFALSE
                 | BExp AND BExp
                 | BExp OR BExp
                 | NOT BExp
-                | '(' BExp ')' { }
+                | '(' BExp ')' { $<node>$ = $<node>2; }
                 ;
 
-AExp:           ID | NUM
-                | AExp '+' AExp 
-                | AExp '-' AExp 
-                | AExp '*' AExp 
-                | AExp '/' AExp 
-                | '(' AExp ')' { }
+AExp:           ID { /*$<node>$ = new IDNode($<idStr>1);*/ } 
+                | NUM { /*$<node>$ = new NumNode($<numStr>1); */ }
+                | AExp '+' AExp { $<node>$ = new AOpNode('+', $<node>1, $<node>2); } 
+                | AExp '-' AExp { $<node>$ = new AOpNode('-', $<node>1, $<node>2); }
+                | AExp '*' AExp { $<node>$ = new AOpNode('*', $<node>1, $<node>2); }
+                | AExp '/' AExp { $<node>$ = new AOpNode('/', $<node>1, $<node>2); }
+                | '(' AExp ')' { $<node>$ = $<node>2; }
                 ;
 
-Predicate:      '{' BExp '}' ;
+Predicate:      '{' BExp '}' { /*$<node>$ = new PredNode($<node>1);*/ } ;
 
 %%
 

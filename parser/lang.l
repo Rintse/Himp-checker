@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string>
 #include "../include/node.h"
+#include "z3++.h"
 #include "par.h"
 
 /* extern C declarations */
