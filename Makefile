@@ -15,13 +15,14 @@ MAIN_DEPS		= $(MAIN_OBJ:.o=.d)
 MAIN_TARGET		= h2smt
 CC				= g++
 CFLAGS			= -std=c++11 -g -Wall
+Z3FLAGS			= -lz3
 CPPFLAGS 		= $(addprefix -I, $(INC_DIR)) -pedantic
 
 
 all: $(MAIN_TARGET)
 
 $(MAIN_TARGET):  $(OBJECTS) $(MAIN_OBJ) parser/par.o parser/lex.o
-	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^ $(LOADLIBS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^ $(LOADLIBS) $(Z3FLAGS)
 -include $(MAIN_DEPS) $(DEPS)
 
 # PARSER 
@@ -34,6 +35,7 @@ parser/par.h parser/par.c: parser/lang.y
 parser/lex.c: parser/lang.l
 	$(LEX) -o $@ $<
 
+# Objects
 $(MAIN_DIR)%.o: %.cc
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -o $@ -c $< $(LOADLIBS)
 
