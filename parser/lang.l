@@ -1,7 +1,7 @@
 %{
- 
 #include <stdio.h>
 #include <string>
+#include "../include/node.h"
 #include "par.h"
 
 /* extern C declarations */
@@ -17,9 +17,7 @@ int yylex(void);
 }
 #endif
 
-
 int lineno = 1;
-
 %}
 
 %option nounput
@@ -33,97 +31,32 @@ OPTIONAL_FRACTION       ("."{DIGITS})?
 OPTIONAL_EXPONENT       (("E"("+"|"-")?{DIGITS}))?
 NUM     {DIGITS}{OPTIONAL_FRACTION}{OPTIONAL_EXPONENT} 
 
-
 /* Patterns */
 %%
 
-{NUM}           {
-                  yylval.numStr = strdup(yytext);
+{NUM}           { yylval.numStr = strdup(yytext);
                   return NUM;
                 }
-
-if              {
-                  return IF;
-                }
-
-then            {
-                  return THEN;
-                }
-
-else            {
-                  return ELSE;
-                }
-
-fi              {
-                  return FI;
-                }
-
-while           {
-                  return WHILE;
-                }
-
-do              {
-                  return DO;
-                }
-
-
-od              {
-                  return OD;
-                }
-
-
-false           {
-                  return BFALSE;
-                } 
-
-true            {
-                  return BTRUE;
-                } 
-
-skip            {
-                  return SKIP;
-                }
-
-"<="            {
-                  return LEQ;
-                }
-
-"=="            {
-                  return EQ;
-                }
-
-"and"            {
-                  return AND;
-                }
-"or"            {
-                  return OR;
-                }
-
-not             {
-                  return NOT;
-                } 
-
-":="            {
-                  return ASSIGNOP;
-                }
-
-{ID}            { 
-                  yylval.idStr = strdup(yytext);
+if              { return IF; }
+then            { return THEN; }
+else            { return ELSE; }
+while           { return WHILE; }
+do              { return DO; }
+false           { return BFALSE; } 
+true            { return BTRUE; } 
+skip            { return SKIP; }
+"<="            { return LEQ; }
+"=="            { return EQ; }
+"and"           { return AND; }
+"or"            { return OR; }
+not             { return NOT; } 
+":="            { return ASSIGNOP; }
+{ID}            { yylval.idStr = strdup(yytext);
                   return ID;
                 }
-
-\n              {
-                  lineno++;
-                  /* no return */
-                }
-
-[ \t]+          {  /* eat up whitespace */
-                  /* no return */
-                }
-
-.               {
-                  return(yytext[0]);
-                }
+\n              { lineno++; }
+[ \t]+          {}
+.               { return(yytext[0]); }
 
 %%
 

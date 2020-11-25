@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "../include/node.h"
 
 /* Prototypes */
 static void yyerror(const char *);
@@ -27,7 +28,7 @@ extern int lineno;        /* Current line number */
 
 %token BTRUE BFALSE SKIP NUM ID
 %left ';'
-%token ASSIGNOP WHILE DO OD IF THEN ELSE FI
+%token ASSIGNOP WHILE DO IF THEN ELSE
 %left OR
 %left AND
 %left NOT 
@@ -39,6 +40,7 @@ extern int lineno;        /* Current line number */
 %union {
   char *idStr;
   char *numStr;
+  Node* node;
 }
 
 %% 
@@ -49,8 +51,8 @@ ComGen:         Command
                 | Command ';' Predicate ComGen
 
 Command:        ID ASSIGNOP AExp
-                | IF BExp THEN Block ELSE Block FI
-                | WHILE BExp DO Block OD
+                | IF BExp THEN Block ELSE Block
+                | WHILE BExp DO Block
                 | SKIP
                 ;
 
@@ -60,7 +62,7 @@ BExp:           BTRUE | BFALSE
                 | BExp AND BExp
                 | BExp OR BExp
                 | NOT BExp
-                | '(' BExp ')' 
+                | '(' BExp ')' { }
                 ;
 
 AExp:           ID | NUM
@@ -68,7 +70,7 @@ AExp:           ID | NUM
                 | AExp '-' AExp 
                 | AExp '*' AExp 
                 | AExp '/' AExp 
-                | '(' AExp ')'
+                | '(' AExp ')' { }
                 ;
 
 Predicate:      '{' BExp '}' ;

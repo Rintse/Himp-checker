@@ -1,4 +1,3 @@
-CC				= g++
 LEX				= flex
 YACC			= bison -y -t
 YFLAGS			= --defines --debug --verbose
@@ -21,8 +20,8 @@ CPPFLAGS 		= $(addprefix -I, $(INC_DIR)) -pedantic
 
 all: $(MAIN_TARGET)
 
-$(MAIN_TARGET): parser/lex.o parser/par.o $(OBJECTS) $(MAIN_OBJ) 
-	$(CC) $(CPPFLAGS) -o $@ $^ $(LOADLIBS)
+$(MAIN_TARGET):  $(OBJECTS) $(MAIN_OBJ) parser/par.o parser/lex.o
+	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^ $(LOADLIBS)
 -include $(MAIN_DEPS) $(DEPS)
 
 # PARSER 
@@ -36,10 +35,10 @@ parser/lex.c: parser/lang.l
 	$(LEX) -o $@ $<
 
 $(MAIN_DIR)%.o: %.cc
-	$(CC) $(CPPFLAGS) -MMD -o $@ -c $< $(LOADLIBS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -o $@ -c $< $(LOADLIBS)
 
 $(SRC_DIR)%.o: %.cc
-	$(CC) $(CPPFLAGS) -MMD -o $@ -c $< $(LOADLIBS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -o $@ -c $< $(LOADLIBS)
 
 clean:
 	rm -f $(OBJECTS) $(MAIN_OBJ) $(DEPS) $(MAIN_DEPS) $(MAIN_TARGET)
