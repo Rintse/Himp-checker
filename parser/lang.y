@@ -77,16 +77,6 @@ Predicate:      '{' BExp '}' ;
 
 /* End of rules, more C code will follow now */
 
-int main()
-{
-  int parseResult;
-  
-  parseResult = yyparse();
-  
-  return parseResult;
-}
-
-
 static void yyerror(const char *s)
 {
   fprintf(stderr, "line %d: %s\n", lineno, s);
