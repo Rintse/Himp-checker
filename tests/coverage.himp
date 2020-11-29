@@ -1,0 +1,20 @@
+{ true }
+x := 2;
+{ not x <= 1 }
+y := 10;
+{ not x <= 1 }
+if not x <= 2 or x == 2 then
+    { not x <= 1 }
+    x := y - 1;
+    { not x <= 0 }
+else
+    { not x <= 1 }
+    while (not y <= 0 or not not false) and (x <= 1 and not x == 1) do
+        { not x <= 1 }
+        y := y - 1;
+        { not x <= 1 };
+    { not x <= 1 };
+{ (not x <= 2 or x == 2) and not (not x <= 1) }
+skip;
+{ y == 0 }
+        

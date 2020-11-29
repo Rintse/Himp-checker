@@ -9,4 +9,5 @@ extern Node* tree;
 
 int main() {
     yyparse();
+    printTree(tree);
 }

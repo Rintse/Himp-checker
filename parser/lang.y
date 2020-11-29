@@ -63,12 +63,14 @@ Block:          {   // New block, go deeper into stack
                     comStack.push(std::vector<Node*>());
                 } 
                 Predicate { addPred($<exp>2); } 
-                ComGen { $<node>$ = $<node>4; };
+                ComGen { $<node>$ = $<node>4;};
 
-ComGen:         Command ';' 
-                Predicate { 
-                    addPred($<exp>3); 
-                } ComGen
+ComGen:         Command 
+                /*  Handled implicity by using a stack in the
+                    Command productions */
+                ';' 
+                Predicate { addPred($<exp>3); } 
+                ComGen { $<node>$ = $<node>5; }
                 | /* λ */ { // Final statement of block
                     $<node>$ = new Block(comStack.top(), predStack.top());
                     comStack.pop();
@@ -96,8 +98,8 @@ BExp:           BTRUE           { $<exp>$ = constant(true); }
                 | AExp EQ AExp  { $<exp>$ = $<exp>1->apply(OP_EQ, $<exp>3); }
                 | BExp AND BExp { $<exp>$ = $<exp>1->apply(OP_AND, $<exp>3); }
                 | BExp OR BExp  { $<exp>$ = $<exp>1->apply(OP_OR, $<exp>3); }
-                | NOT BExp      { $<exp>$ = $<exp>1->negate(); }
-                | '(' BExp ')'  { $<exp>$ = $<exp>2; }
+                | NOT BExp      { $<exp>$ = $<exp>2->negate(); }
+                | '(' BExp ')'  { $<exp>$ = $<exp>2->brackets(); }
                 ;
   
 AExp:           Id              { $<exp>$ = $<exp>1; } 
@@ -106,7 +108,7 @@ AExp:           Id              { $<exp>$ = $<exp>1; }
                 | AExp '-' AExp { $<exp>$ = $<exp>1->apply(OP_SUB, $<exp>3); }
                 | AExp '*' AExp { $<exp>$ = $<exp>1->apply(OP_MUL, $<exp>3); }
                 | AExp '/' AExp { $<exp>$ = $<exp>1->apply(OP_DIV, $<exp>3); }
-                | '(' AExp ')'  { $<exp>$ = $<exp>2; }
+                | '(' AExp ')'  { $<exp>$ = $<exp>2->brackets(); }
                 ;
 
 Predicate:      '{' BExp '}' { $<exp>$ = $<exp>2; } ;
@@ -129,18 +131,20 @@ void addPred(Exp* predicate) {
 }
 
 Exp* constant(bool b) {
-    return new Exp(context.bool_val(b));
+    std::string text = b ? "true" : "false";
+    return new Exp(context.bool_val(b), text);
 }
 
 Exp* constant(int c) {
-    return new Exp(context.int_val(c));
+    std::string text = std::to_string(c);
+    return new Exp(context.int_val(c), text);
 }
 
 Exp* lookup(std::string id) {
     return new Exp(
         (z3_vars.insert(
             std::make_pair(id, context.int_const(id.c_str()))
-        ).first)->second
+        ).first)->second, id
     );
 }
 
