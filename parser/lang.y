@@ -9,19 +9,13 @@
 
 /* Prototypes */
 static void yyerror(const char *);
+Exp* constant(int);
+Exp* constant(bool);
+Exp* lookupVar(std::string);
 
-z3::expr lookupVar(std::string);
-
-/* Import from comp.l */
-#ifdef __cplusplus
 extern "C" {
-#endif
-
 int yylex(void);   /* Lexer function */
-
-#ifdef __cplusplus
 }
-#endif
 
 extern int lineno;        /* Current line number */
 
@@ -46,10 +40,10 @@ std::vector<z3::expr> z3_stack;
 
 /* Types to pass between lexer, rules and actions */
 %union {
-  char *idStr;
-  char *numStr;
-  z3::expr *exp;
-  Node* node;
+  char*     idStr;
+  int       nr;
+  Exp*      exp;
+  Node*     node;
 }
 
 %% 
@@ -57,7 +51,10 @@ std::vector<z3::expr> z3_stack;
 Block:          Predicate ComGen Predicate ;
 
 ComGen:         Command 
-                | Command ';' Predicate ComGen
+                | Command ';' Predicate {
+                    
+                }
+                ComGen
 
 Command:        ID { lookupVar($<idStr>1); }
                 ASSIGNOP AExp {
@@ -68,39 +65,48 @@ Command:        ID { lookupVar($<idStr>1); }
                 | SKIP
                 ;
 
-BExp:           BTRUE | BFALSE
-                | AExp LEQ AExp
-                | AExp EQ AExp
-                | BExp AND BExp
-                | BExp OR BExp
-                | NOT BExp
-                | '(' BExp ')' { $<node>$ = $<node>2; }
+BExp:             BTRUE         { $<exp>$ = constant(true); }
+                | BFALSE        { $<exp>$ = constant(false); }
+                | AExp LEQ AExp { $<exp>$ = $<exp>1->apply(OP_LEQ, $<exp>3); }
+                | AExp EQ AExp  { $<exp>$ = $<exp>1->apply(OP_EQ, $<exp>3); }
+                | BExp AND BExp { $<exp>$ = $<exp>1->apply(OP_AND, $<exp>3); }
+                | BExp OR BExp  { $<exp>$ = $<exp>1->apply(OP_OR, $<exp>3); }
+                | NOT BExp      { $<exp>$ = $<exp>1->negate(); }
+                | '(' BExp ')'  { $<exp>$ = $<exp>2; }
+                ;
+  
+AExp:             ID            { $<exp>$ = lookupVar($<idStr>1); } 
+                | NUM           { $<exp>$ = constant($<nr>1); }
+                | AExp '+' AExp { $<exp>$ = $<exp>1->apply(OP_ADD, $<exp>3); } 
+                | AExp '-' AExp { $<exp>$ = $<exp>1->apply(OP_SUB, $<exp>3); }
+                | AExp '*' AExp { $<exp>$ = $<exp>1->apply(OP_MUL, $<exp>3); }
+                | AExp '/' AExp { $<exp>$ = $<exp>1->apply(OP_DIV, $<exp>3); }
+                | '(' AExp ')'  { $<exp>$ = $<exp>2; }
                 ;
 
-AExp:           ID { lookupVar($<idStr>1); } 
-                | NUM { context.int_val(strtol($<numStr>1, NULL, 10)); }
-                | AExp '+' AExp { $<node>$ = new AOpNode('+', $<node>1, $<node>2); } 
-                | AExp '-' AExp { $<node>$ = new AOpNode('-', $<node>1, $<node>2); }
-                | AExp '*' AExp { $<node>$ = new AOpNode('*', $<node>1, $<node>2); }
-                | AExp '/' AExp { $<node>$ = new AOpNode('/', $<node>1, $<node>2); }
-                | '(' AExp ')' { $<node>$ = $<node>2; }
-                ;
-
-Predicate:      '{' BExp '}' { /*$<node>$ = new PredNode($<node>1);*/ } ;
+Predicate:      '{' BExp '}' { $<exp>$ = $<exp>2; } ;
 
 %%
-
-/* End of rules, more C code will follow now */
 
 static void yyerror(const char *s)
 {
   fprintf(stderr, "line %d: %s\n", lineno, s);
 }
 
-z3::expr lookupVar(std::string id) {
-    return (z3_vars.insert(
-        std::make_pair(id, context.int_const(id.c_str()))
-    ).first)->second;
+Exp* constant(bool b) {
+    return new Exp(context.bool_val(b));
+}
+
+Exp* constant(int c) {
+    return new Exp(context.int_val(c));
+}
+
+Exp* lookupVar(std::string id) {
+    return new Exp(
+        (z3_vars.insert(
+            std::make_pair(id, context.int_const(id.c_str()))
+        ).first)->second
+    );
 }
 
 int yywrap()

@@ -30,7 +30,7 @@ NUM     {DIGIT}{DIGIT}*
 
 %%
 
-{NUM}           { yylval.numStr = strdup(yytext);
+{NUM}           { yylval.nr = strtol(yytext, NULL, 10);
                   return NUM;
                 }
 if              { return IF; }
