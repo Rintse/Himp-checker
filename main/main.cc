@@ -5,7 +5,8 @@
 int yyparse();
 int yylex_destroy();
 
+extern Node* tree;
+
 int main() {
     yyparse();
-    Node t;
 }

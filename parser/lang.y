@@ -4,29 +4,37 @@
 #include <math.h>
 #include <map>
 #include <vector>
+#include <stack>
+#include <z3++.h>
 #include "../include/node.h"
-#include"z3++.h"
 
 /* Prototypes */
 static void yyerror(const char *);
 Exp* constant(int);
 Exp* constant(bool);
-Exp* lookupVar(std::string);
+Exp* lookup(std::string);
+void addCom(Node*);
+void addPred(Exp*);
 
 extern "C" {
-int yylex(void);   /* Lexer function */
+    int yylex(void);
 }
+extern int lineno;
 
-extern int lineno;        /* Current line number */
+Node* tree;
 
 z3::context context;
 std::map<std::string, z3::expr> z3_vars;
 std::vector<z3::expr> z3_stack;
+Exp* lastPred;
+
+std::stack< std::vector<Node*> > comStack;
+std::stack< std::vector<Exp*> > predStack;
 
 %}
 
 /* Start symbol */
-%start Block
+%start Program
 
 %token BTRUE BFALSE SKIP NUM ID
 %left ';'
@@ -40,32 +48,49 @@ std::vector<z3::expr> z3_stack;
 
 /* Types to pass between lexer, rules and actions */
 %union {
-  char*     idStr;
-  int       nr;
-  Exp*      exp;
-  Node*     node;
+  char* idStr;
+  int   nr;
+  Exp*  exp;
+  Node* node;
 }
 
 %% 
 
-Block:          Predicate ComGen Predicate ;
+Program:        Block { tree = $<node>1; } ;
 
-ComGen:         Command 
-                | Command ';' Predicate {
-                    
-                }
-                ComGen
+Block:          {   // New block, go deeper into stack 
+                    predStack.push(std::vector<Exp*>());
+                    comStack.push(std::vector<Node*>());
+                } 
+                Predicate { addPred($<exp>2); } 
+                ComGen { $<node>$ = $<node>4; };
 
-Command:        ID { lookupVar($<idStr>1); }
-                ASSIGNOP AExp {
-                    
+ComGen:         Command ';' 
+                Predicate { 
+                    addPred($<exp>3); 
+                } ComGen
+                | /* λ */ { // Final statement of block
+                    $<node>$ = new Block(comStack.top(), predStack.top());
+                    comStack.pop();
+                    predStack.pop();
                 }
-                | IF BExp THEN Block ELSE Block
-                | WHILE BExp DO Block
-                | SKIP
                 ;
 
-BExp:             BTRUE         { $<exp>$ = constant(true); }
+Command:        Id ASSIGNOP AExp {
+                    addCom(new Assign($<exp>1, $<exp>3));
+                }
+                | IF BExp THEN Block ELSE Block {
+                    addCom(new IfElse($<exp>2, $<node>4, $<node>6));
+                }
+                | WHILE BExp DO Block {
+                    addCom(new While($<exp>2, $<node>4));
+                }
+                | SKIP {
+                    addCom(new Skip());
+                }
+                ;
+
+BExp:           BTRUE           { $<exp>$ = constant(true); }
                 | BFALSE        { $<exp>$ = constant(false); }
                 | AExp LEQ AExp { $<exp>$ = $<exp>1->apply(OP_LEQ, $<exp>3); }
                 | AExp EQ AExp  { $<exp>$ = $<exp>1->apply(OP_EQ, $<exp>3); }
@@ -75,7 +100,7 @@ BExp:             BTRUE         { $<exp>$ = constant(true); }
                 | '(' BExp ')'  { $<exp>$ = $<exp>2; }
                 ;
   
-AExp:             ID            { $<exp>$ = lookupVar($<idStr>1); } 
+AExp:           Id              { $<exp>$ = $<exp>1; } 
                 | NUM           { $<exp>$ = constant($<nr>1); }
                 | AExp '+' AExp { $<exp>$ = $<exp>1->apply(OP_ADD, $<exp>3); } 
                 | AExp '-' AExp { $<exp>$ = $<exp>1->apply(OP_SUB, $<exp>3); }
@@ -86,11 +111,21 @@ AExp:             ID            { $<exp>$ = lookupVar($<idStr>1); }
 
 Predicate:      '{' BExp '}' { $<exp>$ = $<exp>2; } ;
 
+Id:              ID { $<exp>$ = lookup($<idStr>1); } ;
+
 %%
 
 static void yyerror(const char *s)
 {
   fprintf(stderr, "line %d: %s\n", lineno, s);
+}
+
+void addCom(Node* command) {
+    comStack.top().push_back(command);
+}
+
+void addPred(Exp* predicate) {
+    predStack.top().push_back(predicate);
 }
 
 Exp* constant(bool b) {
@@ -101,7 +136,7 @@ Exp* constant(int c) {
     return new Exp(context.int_val(c));
 }
 
-Exp* lookupVar(std::string id) {
+Exp* lookup(std::string id) {
     return new Exp(
         (z3_vars.insert(
             std::make_pair(id, context.int_const(id.c_str()))

@@ -1,45 +1,67 @@
 #ifndef node_h
-#define node_h 
+#define node_h
 
-#include "z3++.h"
-
-enum OP {
-    OP_ADD, OP_SUB, OP_DIV, OP_MUL, OP_AND, OP_OR, OP_EQ, OP_LEQ
-};
+#include <vector>
+#include "exp.h"
 
 class Node {
     public:
         Node();
-        ~Node();
-};
-
-class BlockNode {
-    
-};
-
-class IDNode {
-    IDNode(char _op);
+        virtual void verify() {}
 };
 
 
-class Exp : public Node {
+class Block : public Node {
     public:
-        Exp(z3::expr);
-        ~Exp();
-        z3::expr exp;
-        Exp* negate();
-        Exp* apply(OP, Exp*);
+        Block(std::vector<Node*> commands, std::vector<Exp*> predicates);
+        
+        std::vector<Node*> commands;
+        std::vector<Exp*> predicates;
+        
+        void verify() override;
 
 };
 
-class BExp : public Node {
+
+class IfElse : public Node {
     public:
-        z3::expr exp;
+        IfElse(Exp* _bexp, Node* _if_body, Node* _else_body);
+
+        Exp* bexp;
+        Node* if_body;
+        Node* else_body;
+
+        void verify() override;
 };
 
-class AExp : public Node {
+
+class While : public Node {
     public:
-        z3::expr exp;
+        While(Exp* _bexp, Node* _body);
+
+        Exp* bexp;
+        Node* body;
+
+        void verify() override;
+};
+
+
+class Assign : public Node {
+    public:
+        Assign(Exp* id, Exp* aexp);
+        
+        Exp* id;
+        Exp* aexp;
+        
+        void verify() override;
+};
+
+
+class Skip : public Node {
+    public:
+        Skip() {}
+        
+        void verify() override;
 };
 
 #endif

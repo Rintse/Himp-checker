@@ -1,28 +1,43 @@
 #include "node.h"
+#include "exp.h"
 
-Node::Node() {}
-Node::~Node() {}
+Node::Node() {
 
-Exp::Exp(z3::expr _exp) : exp(_exp) {}
-Exp::~Exp() {}
-
-Exp* Exp::negate() {
-    exp = !exp;
-    return this;    
 }
 
-Exp* Exp::apply(OP op, Exp* e) {
-    switch (op) {
-        case OP_ADD: exp = exp +  e->exp; 
-        case OP_SUB: exp = exp -  e->exp; 
-        case OP_MUL: exp = exp *  e->exp; 
-        case OP_DIV: exp = exp /  e->exp;
-        case OP_AND: exp = exp && e->exp;
-        case OP_OR:  exp = exp || e->exp;
-        case OP_EQ:  exp = exp == e->exp;
-        case OP_LEQ: exp = exp <= e->exp;
-    }
+Block::Block(std::vector<Node*> c, std::vector<Exp*> p)
+: commands(c), predicates(p) {}
 
-    delete e;
-    return this;
+void Block::verify() {
+
 }
+
+
+IfElse::IfElse(Exp* _bexp, Node* _if_body, Node* _else_body)
+: bexp(_bexp), if_body(_if_body), else_body(_else_body) {}
+
+void IfElse::verify() {
+
+}
+
+
+While::While(Exp* _bexp, Node* _body) 
+: bexp(_bexp), body(_body) {}
+
+void While::verify() {
+
+}
+
+
+Assign::Assign(Exp* _id, Exp* _aexp)
+: id(_id), aexp(_aexp) {}
+
+void Assign::verify() {
+
+}
+
+
+void Skip::verify() {
+
+}
+

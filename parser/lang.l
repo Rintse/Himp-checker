@@ -1,8 +1,8 @@
 %{
 #include <stdio.h>
 #include <string>
+#include <z3++.h>
 #include "../include/node.h"
-#include "z3++.h"
 #include "par.h"
 
 /* extern C declarations */
@@ -23,13 +23,14 @@ int lineno = 1;
 
 %option nounput
 
+
 LETTER  [a-zA-Z]
 DIGIT   [0-9]
 ID      {LETTER}({LETTER}|{DIGIT})*
 NUM     {DIGIT}{DIGIT}*
 
-%%
 
+%%
 {NUM}           { yylval.nr = strtol(yytext, NULL, 10);
                   return NUM;
                 }
@@ -43,16 +44,15 @@ true            { return BTRUE; }
 skip            { return SKIP; }
 "<="            { return LEQ; }
 "=="            { return EQ; }
-"and"           { return AND; }
-"or"            { return OR; }
+and             { return AND; }
+or              { return OR; }
 not             { return NOT; } 
 ":="            { return ASSIGNOP; }
 {ID}            { yylval.idStr = strdup(yytext);
                   return ID;
                 }
 \n              { lineno++; }
-[ \t]+          {}
+[ \t]+          { }
 .               { return(yytext[0]); }
-
 %%
 
