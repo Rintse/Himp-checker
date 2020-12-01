@@ -36,10 +36,10 @@ parser/lex.c: parser/lang.l
 	$(LEX) -o $@ $<
 
 # Objects
-$(MAIN_DIR)%.o: %.cc
+$(MAIN_DIR)%.o: %.cc %.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -o $@ -c $< $(LOADLIBS)
 
-$(SRC_DIR)%.o: %.cc
+$(SRC_DIR)%.o: %.cc %.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -o $@ -c $< $(LOADLIBS)
 
 clean:
