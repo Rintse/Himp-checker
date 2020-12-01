@@ -1,6 +1,8 @@
 #include "node.h"
 #include "exp.h"
 #include <cstddef>
+#include <memory>
+#include <z3++.h>
 
 #define TAB_SIZE 4
 
@@ -17,6 +19,24 @@ void printPredicate(Exp* predicate, size_t indent) {
     << predicate->to_string() << " }" << std::endl;
 }
 
+void verifyTree(Node* root) {
+    z3::context c;
+    z3::solver s(c);
+
+    z3::check_result res = dynamic_cast<Block*>(root)->verify(&c, &s); 
+
+    switch (res) {
+        case z3::unsat:
+            std::cout << "Success" << std::endl; break;
+        case z3::sat:
+            std::cout << "Failed, counterexample:" << std::endl; 
+            std::cout << s.get_model() << std::endl;
+            break;
+        case z3::unknown:
+            std::cout << "Unknown" << std::endl; break;
+    }
+}
+
 Node::Node() {
 
 }
@@ -26,6 +46,8 @@ Block::Block(std::vector<Node*> c, std::vector<Exp*> p)
 : commands(c), predicates(p) {}
 
 void Block::print(size_t indent) {
+    assert(commands.size() == predicates.size()-1);
+    
     std::cout << gen_indent(indent) << "Block:" << std::endl;
 
     int i;
@@ -36,8 +58,62 @@ void Block::print(size_t indent) {
     printPredicate(predicates[i], indent+1);
 }
 
-void Block::verify() {
+// Verify block statement without pre and postconditions (root of program)
+z3::check_result Block::verify(z3::context *c, z3::solver* s) {
+    assert(commands.size() == predicates.size()-1);
+    assert(predicates.size() > 0);
+    
+    z3::check_result res;
 
+    for(int i = 0; i < commands.size(); i++) {
+        Exp* pre = predicates[i];
+        Node* com = commands[i];
+        Exp* post = predicates[i+1];
+
+        if((res = com->verify(pre, post, c, s)) != z3::unsat) 
+            return res;
+    }
+    
+    return res;
+}
+
+
+z3::check_result Block::verify(
+    Exp* pre, Exp* post, z3::context *c, z3::solver* s
+) {
+    assert(commands.size() == predicates.size()-1);
+    assert(predicates.size() > 0);
+    
+    z3::check_result res;
+
+    // Verify that preC and first predicate do not
+    // contradict each other
+    std::unique_ptr<Node> dummy_skip(new Skip);
+    if((res = dummy_skip->verify(pre, predicates[0], c, s)) != z3::unsat)
+        return res;
+
+    // Loop over hoare triples, verifying each:
+    // Block:   p1 c1 p2 c2 p3 c3 p4 ...
+    // round1:  |------|
+    // round2:        |------|
+    // round3:              |------|
+    // etc..
+    for(int i = 0; i < commands.size(); i++) {
+        Exp* pre = predicates[i];
+        Node* com = commands[i];
+        Exp* post = predicates[i+1];
+
+        if((res = com->verify(pre, post, c, s)) != z3::unsat) 
+            return res;
+    }
+    
+    // Verify that last predicate and postC do not
+    // contradict each other
+    res = dummy_skip->verify(predicates.back(), post, c, s);
+    
+    // Only got here if everything before was unsat: 
+    // simply return result of last check
+    return res;
 }
 
 
@@ -53,10 +129,11 @@ void IfElse::print(size_t indent) {
     else_body->print(indent+1);
 }
 
-void IfElse::verify() {
-
+z3::check_result IfElse::verify(
+    Exp* pre, Exp* post, z3::context *c, z3::solver* s
+) {
+    return z3::unknown;
 }
-
 
 While::While(Exp* _bexp, Node* _body) 
 : bexp(_bexp), body(_body) {}
@@ -67,8 +144,10 @@ void While::print(size_t indent) {
     body->print(indent+1);
 }
 
-void While::verify() {
-
+z3::check_result While::verify(
+    Exp* pre, Exp* post, z3::context *c, z3::solver* s
+) {
+    return z3::unknown;
 }
 
 
@@ -80,7 +159,29 @@ void Assign::print(size_t indent) {
     << " := " << aexp->to_string() << std::endl;
 }
 
-void Assign::verify() {
+z3::check_result Assign::verify(Exp* pre, Exp* post, z3::context *c, z3::solver* s) {
+    return z3::unknown;
+}
 
+
+Skip::Skip() {}
+
+void Skip::print(size_t indent) {
+    std::cout << gen_indent(indent) << "skip\n"; 
+}
+
+z3::check_result Skip::verify(
+    Exp* pre, Exp* post, z3::context *c, z3::solver* s
+) {
+    s->add(pre->to_Z3(c));
+    
+    s->push();
+    s->add(!post->to_Z3(c));
+
+    z3::check_result res = s->check();
+
+    if(res == z3::unsat) s->pop();
+
+    return res;
 }
 

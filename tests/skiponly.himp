@@ -1,0 +1,11 @@
+{ not x <= 0 and y == 3 }
+skip;
+{ not x <= -1 }
+skip;
+{ true }
+skip;
+{ not y == 2 }
+skip;
+{ x <= y }
+skip;
+{ true }

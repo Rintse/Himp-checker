@@ -1,4 +1,5 @@
 #include <iostream>
+#include <z3++.h>
 #include "node.h"
 
 /* Extern functions */
@@ -10,4 +11,5 @@ extern Node* tree;
 int main() {
     yyparse();
     printTree(tree);
+    verifyTree(tree);
 }

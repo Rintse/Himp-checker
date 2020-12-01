@@ -27,11 +27,11 @@ int lineno = 1;
 LETTER  [a-zA-Z]
 DIGIT   [0-9]
 ID      {LETTER}({LETTER}|{DIGIT})*
-NUM     {DIGIT}{DIGIT}*
+NUM     -?({DIGIT}{DIGIT}*)
 
 
 %%
-{NUM}           { yylval.nr = strtol(yytext, NULL, 10);
+{NUM}           { yylval.nr = std::stoi(yytext, NULL, 10);
                   return NUM;
                 }
 if              { return IF; }

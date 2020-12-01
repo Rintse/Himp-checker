@@ -10,9 +10,6 @@
 
 /* Prototypes */
 static void yyerror(const char *);
-Exp* constant(int);
-Exp* constant(bool);
-Exp* lookup(std::string);
 void addCom(Node*);
 void addPred(Exp*);
 
@@ -22,11 +19,6 @@ extern "C" {
 extern int lineno;
 
 Node* tree;
-
-z3::context context;
-std::map<std::string, z3::expr> z3_vars;
-std::vector<z3::expr> z3_stack;
-Exp* lastPred;
 
 std::stack< std::vector<Node*> > comStack;
 std::stack< std::vector<Exp*> > predStack;
@@ -92,28 +84,28 @@ Command:        Id ASSIGNOP AExp {
                 }
                 ;
 
-BExp:           BTRUE           { $<exp>$ = constant(true); }
-                | BFALSE        { $<exp>$ = constant(false); }
-                | AExp LEQ AExp { $<exp>$ = $<exp>1->apply(OP_LEQ, $<exp>3); }
-                | AExp EQ AExp  { $<exp>$ = $<exp>1->apply(OP_EQ, $<exp>3); }
-                | BExp AND BExp { $<exp>$ = $<exp>1->apply(OP_AND, $<exp>3); }
-                | BExp OR BExp  { $<exp>$ = $<exp>1->apply(OP_OR, $<exp>3); }
-                | NOT BExp      { $<exp>$ = $<exp>2->negate(); }
-                | '(' BExp ')'  { $<exp>$ = $<exp>2->brackets(); }
+BExp:           BTRUE           { $<exp>$ = new Bool(true); }
+                | BFALSE        { $<exp>$ = new Bool(false); }
+                | AExp LEQ AExp { $<exp>$ = new BinaryOp($<exp>1, OP_LEQ, $<exp>3); }
+                | AExp EQ AExp  { $<exp>$ = new BinaryOp($<exp>1, OP_EQ, $<exp>3); }
+                | BExp AND BExp { $<exp>$ = new BinaryOp($<exp>1, OP_AND, $<exp>3); }
+                | BExp OR BExp  { $<exp>$ = new BinaryOp($<exp>1, OP_OR, $<exp>3); }
+                | NOT BExp      { $<exp>$ = new UnaryOp(OP_NEG, $<exp>2); }
+                | '(' BExp ')'  { $<exp>$ = $<exp>2; }
                 ;
   
 AExp:           Id              { $<exp>$ = $<exp>1; } 
-                | NUM           { $<exp>$ = constant($<nr>1); }
-                | AExp '+' AExp { $<exp>$ = $<exp>1->apply(OP_ADD, $<exp>3); } 
-                | AExp '-' AExp { $<exp>$ = $<exp>1->apply(OP_SUB, $<exp>3); }
-                | AExp '*' AExp { $<exp>$ = $<exp>1->apply(OP_MUL, $<exp>3); }
-                | AExp '/' AExp { $<exp>$ = $<exp>1->apply(OP_DIV, $<exp>3); }
-                | '(' AExp ')'  { $<exp>$ = $<exp>2->brackets(); }
+                | NUM           { $<exp>$ = new Integer($<nr>1); }
+                | AExp '+' AExp { $<exp>$ = new BinaryOp($<exp>1, OP_ADD, $<exp>3); } 
+                | AExp '-' AExp { $<exp>$ = new BinaryOp($<exp>1, OP_SUB, $<exp>3); }
+                | AExp '*' AExp { $<exp>$ = new BinaryOp($<exp>1, OP_MUL, $<exp>3); }
+                | AExp '/' AExp { $<exp>$ = new BinaryOp($<exp>1, OP_DIV, $<exp>3); }
+                | '(' AExp ')'  { $<exp>$ = $<exp>2; }
                 ;
 
 Predicate:      '{' BExp '}' { $<exp>$ = $<exp>2; } ;
 
-Id:              ID { $<exp>$ = lookup($<idStr>1); } ;
+Id:              ID { $<exp>$ = new Var($<idStr>1); } ;
 
 %%
 
@@ -128,24 +120,6 @@ void addCom(Node* command) {
 
 void addPred(Exp* predicate) {
     predStack.top().push_back(predicate);
-}
-
-Exp* constant(bool b) {
-    std::string text = b ? "true" : "false";
-    return new Exp(context.bool_val(b), text);
-}
-
-Exp* constant(int c) {
-    std::string text = std::to_string(c);
-    return new Exp(context.int_val(c), text);
-}
-
-Exp* lookup(std::string id) {
-    return new Exp(
-        (z3_vars.insert(
-            std::make_pair(id, context.int_const(id.c_str()))
-        ).first)->second, id
-    );
 }
 
 int yywrap()
