@@ -16,12 +16,14 @@ enum UNOP {
 
 class Exp {
     public:
-        Exp();
-        ~Exp();
+        Exp() {}
+        virtual ~Exp() {}
         
         virtual std::string to_string() = 0;
         virtual z3::expr to_Z3(z3::context* c) = 0;
         virtual bool contains(std::string to_find) = 0;
+        virtual Exp* copy() = 0;
+        virtual Exp* substitute(std::string to_sub, std::string sub) = 0;
 
     protected:
         std::string text;
@@ -31,10 +33,13 @@ class Exp {
 class UnaryOp : public Exp {
     public:
         UnaryOp(UNOP _op, Exp* c);
+        ~UnaryOp();
 
         z3::expr to_Z3(z3::context* c) override;
         std::string to_string() override;
         bool contains(std::string to_find) override;
+        Exp* copy() override;
+        Exp* substitute(std::string to_sub, std::string sub) override;
 
     private:
         UNOP op;
@@ -44,10 +49,13 @@ class UnaryOp : public Exp {
 class BinaryOp : public Exp {
     public:
         BinaryOp(Exp* c1, BINOP _op, Exp* c2);
+        ~BinaryOp();
         
         z3::expr to_Z3(z3::context* c) override;
         std::string to_string() override;
         bool contains(std::string to_find) override;
+        Exp* copy() override;
+        Exp* substitute(std::string to_sub, std::string sub) override;
     
     private:
         BINOP op;
@@ -57,10 +65,13 @@ class BinaryOp : public Exp {
 class Integer : public Exp {
     public:
         Integer(int i);
+        ~Integer() {}
 
         z3::expr to_Z3(z3::context* c) override;
         std::string to_string() override;
         bool contains(std::string to_find) override;
+        Exp* copy() override;
+        Exp* substitute(std::string to_sub, std::string sub) override;
         
     private:
         int val;
@@ -69,10 +80,13 @@ class Integer : public Exp {
 class Bool : public Exp {
     public:
         Bool(bool b);
+        ~Bool() {}
 
         z3::expr to_Z3(z3::context* c) override;
         std::string to_string() override;
         bool contains(std::string to_find) override;
+        Exp* copy() override;
+        Exp* substitute(std::string to_sub, std::string sub) override;
         
     private:
         bool val;
@@ -81,10 +95,13 @@ class Bool : public Exp {
 class Var : public Exp {
     public:
         Var(std::string _id);
+        ~Var() {}
 
         z3::expr to_Z3(z3::context* c) override;
         std::string to_string() override;
         bool contains(std::string to_find) override;
+        Exp* copy() override;
+        Exp* substitute(std::string to_sub, std::string sub) override;
         
     private:
         std::string id;

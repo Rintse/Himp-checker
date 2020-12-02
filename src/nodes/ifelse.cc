@@ -21,13 +21,16 @@ z3::check_result IfElse::verify(
     z3::check_result res;
     
     // Verify (bexp && if body) 
-    std::unique_ptr<Exp> bexp_true(new BinaryOp(pre, OP_AND, bexp));
+    std::unique_ptr<Exp> bexp_true(
+        new BinaryOp(pre->copy(), OP_AND, bexp->copy())
+    );
     if((res = if_body->verify(bexp_true.get(), post, c, s)) != z3::unsat)
         return res;
     
     // Verify (!bexp && else body) 
-    std::unique_ptr<Exp> not_bexp(new UnaryOp(OP_NEG, bexp));
-    std::unique_ptr<Exp> bexp_false(new BinaryOp(pre, OP_AND, not_bexp.get()));
+    std::unique_ptr<Exp> bexp_false(
+        new BinaryOp(pre->copy(), OP_AND, new UnaryOp(OP_NEG, bexp->copy()))
+    );
     res = else_body->verify(bexp_false.get(), post, c, s);
 
     return res;

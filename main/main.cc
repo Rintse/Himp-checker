@@ -10,6 +10,13 @@ extern Node* tree;
 
 int main() {
     yyparse();
+
+    if(tree == nullptr) {
+        return 1;
+    }
+    
     printTree(tree);
     verifyTree(tree);
+
+    return 0;
 }

@@ -9,9 +9,9 @@ void Skip::print(size_t indent) {
 z3::check_result Skip::verify(
     Exp* pre, Exp* post, z3::context *c, z3::solver* s
 ) {
-    s->add(pre->to_Z3(c));
-    
     s->push();
+    
+    s->add(pre->to_Z3(c));
     s->add(!post->to_Z3(c));
 
     z3::check_result res = s->check();

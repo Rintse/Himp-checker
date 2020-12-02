@@ -23,16 +23,19 @@ z3::check_result While::verify(
         return res;
 
     // Verify that the invariant holds during execution of body (bexp == true)
-    std::unique_ptr<Exp> loop(new BinaryOp(invariant, OP_AND, bexp));
+    std::unique_ptr<Exp> loop(
+        new BinaryOp(invariant->copy(), OP_AND, bexp->copy())
+    );
     if((res = body->verify(loop.get(), invariant, c, s)) != z3::unsat)
         return res;
 
     // Verify that the invariant holds after execution of the loop (bexp == false)
     // and that the post condition follows
-    std::unique_ptr<Exp> not_bexp(new UnaryOp(OP_NEG, bexp));
-    std::unique_ptr<Exp> loop_end(new BinaryOp(invariant, OP_AND, not_bexp.get()));
+    std::unique_ptr<Exp> loop_end(
+        new BinaryOp(invariant, OP_AND, new UnaryOp(OP_NEG, bexp->copy()))
+    );
     res = dummy_skip->verify(loop_end.get(), post, c, s);
-    
+   
     return res;
 }
 

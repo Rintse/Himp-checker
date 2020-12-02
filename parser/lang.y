@@ -18,7 +18,7 @@ extern "C" {
 }
 extern int lineno;
 
-Node* tree;
+Node* tree = nullptr;
 
 // Strings to relative operators
 std::map<std::string, BINOP> rops = {
@@ -62,7 +62,22 @@ Block:          {   // New block, go deeper into stack
                     comStack.push(std::vector<Node*>());
                 } 
                 Predicate { addPred($<exp>2); } 
-                ComGen { $<node>$ = $<node>4;};
+                ComGen { $<node>$ = $<node>4; } ;
+
+WhileBlock:     {   // New block, go deeper into stack 
+                    predStack.push(std::vector<Exp*>());
+                    comStack.push(std::vector<Node*>());
+                } 
+                Command ';' ComGen2 { $<node>$ = $<node>4; } ;
+
+ComGen2:        Predicate { addPred($<exp>1); } Command ';' 
+                ComGen2 { $<node>$ = $<node>5; }
+                | /* λ */ { // Final statement of block
+                    $<node>$ = new Block(comStack.top(), predStack.top());
+                    comStack.pop();
+                    predStack.pop();
+                }
+                ;
 
 ComGen:         Command 
                 /*  Handled implicity by using a stack in the
@@ -83,7 +98,7 @@ Command:        Id ASSIGNOP AExp {
                 | IF BExp THEN Block ELSE Block {
                     addCom(new IfElse($<exp>2, $<node>4, $<node>6));
                 }
-                | WHILE BExp Invariant DO Block {
+                | WHILE BExp Invariant DO WhileBlock {
                     addCom(new While($<exp>2, $<exp>3, $<node>5));
                 }
                 | SKIP {

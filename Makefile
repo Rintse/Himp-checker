@@ -26,8 +26,8 @@ $(MAIN_TARGET):  $(OBJECTS) $(MAIN_OBJ) parser/par.o parser/lex.o
 -include $(MAIN_DEPS) $(DEPS)
 
 # PARSER 
-parser/lex.o: parser/lex.c parser/par.h
-parser/par.o: parser/par.c
+parser/lex.o: parser/lex.c parser/par.h $(OBJECTS)
+parser/par.o: parser/par.c $(OBJECTS)
 
 parser/par.h parser/par.c: parser/lang.y
 	$(YACC) $(YFLAGS) $< -o parser/par.c
