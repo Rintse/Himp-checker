@@ -42,16 +42,18 @@ do              { return DO; }
 false           { return BFALSE; } 
 true            { return BTRUE; } 
 skip            { return SKIP; }
-"<="            { return LEQ; }
-"=="            { return EQ; }
 and             { return AND; }
 or              { return OR; }
 not             { return NOT; } 
 ":="            { return ASSIGNOP; }
-{ID}            { yylval.idStr = strdup(yytext);
+{ID}            { yylval.str = strdup(yytext);
                   return ID;
                 }
-\n              { lineno++; }
+"<="|">="|"<"|">"|"=="|"!=" { 
+                  yylval.str = strdup(yytext); 
+                  return ROP; 
+                }
+\n              { lineno++; } //TODO: use in error logging
 [ \t]+          { }
 .               { return(yytext[0]); }
 %%

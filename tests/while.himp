@@ -1,0 +1,13 @@
+{ x = 0 and y == 11 }
+y : = y - 1;
+{ true }
+while y > 0 [ x + y == 10 ] do
+    { true }
+    y := y - 1;
+    { true }
+    x := x + 1;
+    { true }
+;
+{ x == 10 }
+
+

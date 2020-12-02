@@ -5,7 +5,9 @@
 #include<z3++.h>
 
 enum BINOP {
-    OP_ADD, OP_SUB, OP_DIV, OP_MUL, OP_AND, OP_OR, OP_EQ, OP_LEQ
+    OP_ADD, OP_SUB, OP_DIV, OP_MUL, // arithmetic
+    OP_AND, OP_OR, // boolean
+    OP_EQ, OP_NEQ, OP_LT, OP_GT, OP_LEQ, OP_GEQ // relative
 };
 
 enum UNOP {
@@ -19,6 +21,7 @@ class Exp {
         
         virtual std::string to_string() = 0;
         virtual z3::expr to_Z3(z3::context* c) = 0;
+        virtual bool contains(std::string to_find) = 0;
 
     protected:
         std::string text;
@@ -31,6 +34,7 @@ class UnaryOp : public Exp {
 
         z3::expr to_Z3(z3::context* c) override;
         std::string to_string() override;
+        bool contains(std::string to_find) override;
 
     private:
         UNOP op;
@@ -43,6 +47,7 @@ class BinaryOp : public Exp {
         
         z3::expr to_Z3(z3::context* c) override;
         std::string to_string() override;
+        bool contains(std::string to_find) override;
     
     private:
         BINOP op;
@@ -55,6 +60,7 @@ class Integer : public Exp {
 
         z3::expr to_Z3(z3::context* c) override;
         std::string to_string() override;
+        bool contains(std::string to_find) override;
         
     private:
         int val;
@@ -66,6 +72,7 @@ class Bool : public Exp {
 
         z3::expr to_Z3(z3::context* c) override;
         std::string to_string() override;
+        bool contains(std::string to_find) override;
         
     private:
         bool val;
@@ -77,6 +84,7 @@ class Var : public Exp {
 
         z3::expr to_Z3(z3::context* c) override;
         std::string to_string() override;
+        bool contains(std::string to_find) override;
         
     private:
         std::string id;

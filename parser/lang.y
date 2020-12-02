@@ -20,6 +20,13 @@ extern int lineno;
 
 Node* tree;
 
+// Strings to relative operators
+std::map<std::string, BINOP> rops = {
+    {"==", OP_EQ}, {"!=", OP_NEQ}, 
+    {"<", OP_LT}, {">", OP_GT},
+    {"<=", OP_LEQ}, {">=", OP_GEQ}
+};
+
 std::stack< std::vector<Node*> > comStack;
 std::stack< std::vector<Exp*> > predStack;
 
@@ -29,18 +36,18 @@ std::stack< std::vector<Exp*> > predStack;
 %start Program
 
 %token BTRUE BFALSE SKIP NUM ID
-%left ';'
+%left ';' // Sequencing is left associative
 %token ASSIGNOP WHILE DO IF THEN ELSE
-%left OR
-%left AND
-%left NOT 
-%token LEQ EQ
-%left '+' '-'
-%left '*' '/'
+%left OR // Logic or
+%left AND // Logic and
+%left NOT // Logic negation 
+%token ROP // Relative operator
+%left '+' '-' // Arithmetic
+%left '*' '/' // Arithmetic
 
 /* Types to pass between lexer, rules and actions */
 %union {
-  char* idStr;
+  char* str;
   int   nr;
   Exp*  exp;
   Node* node;
@@ -76,8 +83,8 @@ Command:        Id ASSIGNOP AExp {
                 | IF BExp THEN Block ELSE Block {
                     addCom(new IfElse($<exp>2, $<node>4, $<node>6));
                 }
-                | WHILE BExp DO Block {
-                    addCom(new While($<exp>2, $<node>4));
+                | WHILE BExp Invariant DO Block {
+                    addCom(new While($<exp>2, $<exp>3, $<node>5));
                 }
                 | SKIP {
                     addCom(new Skip());
@@ -86,16 +93,21 @@ Command:        Id ASSIGNOP AExp {
 
 BExp:           BTRUE           { $<exp>$ = new Bool(true); }
                 | BFALSE        { $<exp>$ = new Bool(false); }
-                | AExp LEQ AExp { $<exp>$ = new BinaryOp($<exp>1, OP_LEQ, $<exp>3); }
-                | AExp EQ AExp  { $<exp>$ = new BinaryOp($<exp>1, OP_EQ, $<exp>3); }
+                // Boolean operators (seperate due to differing precedences)
                 | BExp AND BExp { $<exp>$ = new BinaryOp($<exp>1, OP_AND, $<exp>3); }
                 | BExp OR BExp  { $<exp>$ = new BinaryOp($<exp>1, OP_OR, $<exp>3); }
                 | NOT BExp      { $<exp>$ = new UnaryOp(OP_NEG, $<exp>2); }
+                // Relative operators
+                | AExp ROP AExp { 
+                    $<exp>$ = new BinaryOp($<exp>1, rops[$<str>2], $<exp>3); 
+                    free($<str>2);
+                }
                 | '(' BExp ')'  { $<exp>$ = $<exp>2; }
                 ;
   
 AExp:           Id              { $<exp>$ = $<exp>1; } 
                 | NUM           { $<exp>$ = new Integer($<nr>1); }
+                // Arithmetic operators (seperate due to differing precedences)
                 | AExp '+' AExp { $<exp>$ = new BinaryOp($<exp>1, OP_ADD, $<exp>3); } 
                 | AExp '-' AExp { $<exp>$ = new BinaryOp($<exp>1, OP_SUB, $<exp>3); }
                 | AExp '*' AExp { $<exp>$ = new BinaryOp($<exp>1, OP_MUL, $<exp>3); }
@@ -105,7 +117,9 @@ AExp:           Id              { $<exp>$ = $<exp>1; }
 
 Predicate:      '{' BExp '}' { $<exp>$ = $<exp>2; } ;
 
-Id:              ID { $<exp>$ = new Var($<idStr>1); } ;
+Invariant:      '[' BExp ']' { $<exp>$ = $<exp>2; } ;
+
+Id:              ID { $<exp>$ = new Var($<str>1); } ;
 
 %%
 
