@@ -8,7 +8,9 @@ While::While(Exp* _bexp, Exp* inv, Node* _body)
 
 void While::print(size_t indent) {
     std::cout << gen_indent(indent) << "While " 
-    << bexp->to_string() << " do" << std::endl;
+    << bexp->to_string() << " [" << std::endl; 
+    printPredicate(invariant, indent+1);
+    std::cout << gen_indent(indent) << "] do" << std::endl;
     body->print(indent+1);
 }
 

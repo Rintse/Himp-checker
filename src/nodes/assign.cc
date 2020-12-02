@@ -18,23 +18,18 @@ z3::check_result Assign::verify(Exp* pre, Exp* post, z3::context *c, z3::solver*
     s->add(pre->to_Z3(c));
     
     if(aexp->contains(id_str)) { // Self assignment: do [_x/x] in command and post
-        std::cout << "Self assignment, adjusting lhs and post" << std::endl;
-
         std::unique_ptr<Exp> _id(new Var("_" + id_str)); 
-        std::unique_ptr<Exp> _aexp(aexp->substitute(id_str, "_" + id_str));
         std::unique_ptr<Exp> _post(post->substitute(id_str, "_" + id_str));
         
-        s->add(_id->to_Z3(c) == _aexp->to_Z3(c));
+        s->add(_id->to_Z3(c) == aexp->to_Z3(c));
         s->add(!_post->to_Z3(c));
     }
     else { //just use the original statement
         s->add(id->to_Z3(c) == aexp->to_Z3(c));
-        s->push();
         s->add(!post->to_Z3(c));
     }
 
     z3::check_result res = s->check();
-
     if(res == z3::unsat) s->pop();
 
     return res;

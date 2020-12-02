@@ -8,6 +8,7 @@
 
 void printTree(Node* root) {
     root->print(0);
+    std::cout << std::endl;
 }
 
 std::string gen_indent(size_t indent) {

@@ -1,7 +1,7 @@
 #include "exp.h"
 
 BinaryOp::BinaryOp(Exp* c1, BINOP _op, Exp* c2) 
-: child1(c1), op(_op), child2(c2) {}
+: op(_op), child1(c1), child2(c2) {}
 
 BinaryOp::~BinaryOp() { delete child1; delete child2; }
 

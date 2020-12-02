@@ -1,7 +1,7 @@
 LEX				= flex
 YACC			= bison -y -t
 YFLAGS			= --defines --debug --verbose
-LOADLIBS		= -lfl -lm
+PARSE_FLAGS		= -lfl -lm
 INC_DIR			= include
 SRC_DIR			= src
 MAIN_DIR		= main
@@ -22,7 +22,7 @@ CPPFLAGS 		= $(addprefix -I, $(INC_DIR)) -pedantic
 all: $(MAIN_TARGET)
 
 $(MAIN_TARGET):  $(OBJECTS) $(MAIN_OBJ) parser/par.o parser/lex.o
-	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^ $(LOADLIBS) $(Z3FLAGS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^ $(PARSE_FLAGS) $(Z3FLAGS)
 -include $(MAIN_DEPS) $(DEPS)
 
 # PARSER 
@@ -36,11 +36,8 @@ parser/lex.c: parser/lang.l
 	$(LEX) -o $@ $<
 
 # Objects
-$(MAIN_DIR)%.o: %.cc %.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -o $@ -c $< $(LOADLIBS)
-
-$(SRC_DIR)%.o: %.cc %.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -o $@ -c $< $(LOADLIBS)
+%.o: %.cc
+	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -o $@ -c $< $(PARSE_FLAGS)
 
 clean:
 	rm -f $(OBJECTS) $(MAIN_OBJ) $(DEPS) $(MAIN_DEPS) $(MAIN_TARGET)

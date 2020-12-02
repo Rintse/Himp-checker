@@ -15,7 +15,10 @@ int main() {
         return 1;
     }
     
+    std::cout << "Program:" << std::endl;
     printTree(tree);
+
+    std::cout << "Verifying correctness..." << std::endl;
     verifyTree(tree);
 
     return 0;

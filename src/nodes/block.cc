@@ -1,4 +1,5 @@
 #include "node.h"
+#include <cstddef>
 #include <memory>
 #include <list>
 
@@ -9,7 +10,7 @@ Block::Block(std::vector<Node*> c, std::vector<Exp*> p)
 
 void Block::print(size_t indent) {
     std::cout << gen_indent(indent) << "Block:" << std::endl;
-    int i;
+    size_t i;
 
     if(commands.size() > predicates.size()) {
         for(i = 0; i < predicates.size(); i++) {
@@ -37,14 +38,7 @@ z3::check_result Block::verify(z3::context *c, z3::solver* s) {
     // round1:  |------|
     // round2:        |------|
     // round3:              |------|
-    // etc..
-    for(int i = 0; i < commands.size(); i++) {
-        std::cout << "verifying" << std::endl;
-        printPredicate(predicates[i], 0);
-        commands[i]->print(0);
-        printPredicate(predicates[i+1], 0);
-        std::cout << std::endl;
-
+    for(size_t i = 0; i < commands.size(); i++) {
         if((res = commands[i]->verify(
             predicates[i], predicates[i+1], c, s)
         ) != z3::unsat) {
@@ -77,15 +71,12 @@ z3::check_result Block::verify(
     // Check all triples
     auto pred_it = preds.begin();
     for(auto com_it = coms.begin(); com_it != coms.end(); com_it++) {
-        std::cout << "Verifying" << std::endl;
-        printPredicate(*pred_it, 0);
-        (*com_it)->print(0);
+        auto _pre = *pred_it;
+        auto _post = *(++pred_it);
 
-        if((res = (*com_it)->verify(*pred_it, *(++pred_it), c, s)) != z3::unsat)
+        if((res = (*com_it)->verify(_pre, _post, c, s)) != z3::unsat)
             return res;
        
-        printPredicate(*pred_it, 0);
-        std::cout << std::endl;
     }
     
     // Only got here if everything before was unsat: 
