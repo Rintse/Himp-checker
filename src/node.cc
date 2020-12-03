@@ -3,6 +3,11 @@
 #include <cstddef>
 #include <memory>
 #include <z3++.h>
+#include "result.h"
+
+size_t Node::get_line() {
+    return line;
+}
 
 #define TAB_SIZE 4
 
@@ -24,17 +29,6 @@ void verifyTree(Node* root) {
     z3::context c;
     z3::solver s(c);
 
-    z3::check_result res = dynamic_cast<Block*>(root)->verify(&c, &s); 
-
-    switch (res) {
-        case z3::unsat:
-            std::cout << "Success" << std::endl; break;
-        case z3::sat:
-            std::cout << "Failed, counterexample:" << std::endl; 
-            std::cout << s.get_model() << std::endl;
-            break;
-        case z3::unknown:
-            std::cout << "Unknown" << std::endl; break;
-    }
+    dynamic_cast<Block*>(root)->verify(&c, &s).print(); 
 }
 

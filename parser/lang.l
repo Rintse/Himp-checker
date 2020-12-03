@@ -10,8 +10,8 @@
 extern "C" {
 #endif
 
-/* should be defined in stdio.h */
 extern int fileno(FILE *);
+size_t line = 1;
 int yylex(void);
 
 #if defined(__cplusplus)
@@ -52,7 +52,8 @@ not             { return NOT; }
                   yylval.str = strdup(yytext); 
                   return ROP; 
                 }
-[ \t]+|"\n"     { /* Eat tabs and enters */ }
+[ \t]+          { /* Eat tabs */ }
+"\n"            { line++; }
 .               { return(yytext[0]); }
 %%
 

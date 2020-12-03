@@ -4,20 +4,29 @@
 #ifndef node_h
 #define node_h
 
+#define LOG_WIDTH 40
+
 #include <cstddef>
 #include <vector>
 #include <z3++.h>
 #include "exp.h"
+#include "result.h"
 
 // Abstract node class
 class Node {
     public:
-        Node() {}
+        Node(size_t _line) : line(_line) {}
         virtual ~Node() {}
-        virtual void print(size_t) {}        
-        virtual z3::check_result verify(
+    
+        size_t get_line();
+
+        virtual void print(size_t) = 0;
+        virtual void log() = 0;
+
+        virtual Result verify(
             Exp* pre, Exp* post, z3::context* c, z3::solver* s
         ) = 0;
+        size_t line;
 };
 
 // Print a (sub)tree as indented text
@@ -34,14 +43,19 @@ void verifyTree(Node* root);
 // @member predicates: the hoare predicates surrounding the commands
 class Block : public Node {
     public:
-        Block(std::vector<Node*> commands, std::vector<Exp*> predicates);
+        Block(
+            std::vector<Node*> commands, 
+            std::vector<Exp*> predicates,
+            size_t line
+        );
         ~Block();
         
         void print(size_t indent) override;       
-        z3::check_result verify(
+        void log() override;       
+        Result verify(
             Exp* pre, Exp* post, z3::context *c, z3::solver* s
         ) override;
-        z3::check_result verify(z3::context *c, z3::solver *s);
+        Result verify(z3::context *c, z3::solver *s);
 
     private:
         std::vector<Node*> commands;
@@ -54,11 +68,12 @@ class Block : public Node {
 // @member else_body: A Block representing the body of the false-case 
 class IfElse : public Node {
     public:
-        IfElse(Exp* _bexp, Node* _if_body, Node* _else_body);
+        IfElse(Exp* _bexp, Node* _if_body, Node* _else_body, size_t line);
         ~IfElse();
 
         void print(size_t indent) override;       
-        z3::check_result verify(
+        void log() override;       
+        Result verify(
             Exp* pre, Exp* post, z3::context *c, z3::solver* s
         ) override;
 
@@ -73,17 +88,18 @@ class IfElse : public Node {
 // @member body: a Block representing the body of the loop 
 class While : public Node {
     public:
-        While(Exp* _bexp, Exp* inv, Node* _body);
+        While(Exp* _bexp, Exp* inv, Node* _body, size_t line);
         ~While();
 
         void print(size_t indent) override;       
-        z3::check_result verify(
+        void log() override;       
+        Result verify(
             Exp* pre, Exp* post, z3::context *c, z3::solver* s
         ) override;
 
     private:
         Exp* bexp;
-        Exp* invariant;
+        Exp* inv;
         Node* body;
 };
 
@@ -92,11 +108,12 @@ class While : public Node {
 // @member aexp: an arithmetic Exp
 class Assign : public Node {
     public:
-        Assign(Exp* id, Exp* aexp);
+        Assign(Exp* id, Exp* aexp, size_t line);
         ~Assign();
         
         void print(size_t indent) override;       
-        z3::check_result verify(
+        void log() override;       
+        Result verify(
             Exp* pre, Exp* post, z3::context *c, z3::solver* s
         ) override;
 
@@ -108,11 +125,12 @@ class Assign : public Node {
 // Represents an skip (empty) statement
 class Skip : public Node {
     public:
-        Skip();
+        Skip(size_t line);
         ~Skip();
         
         void print(size_t indent) override;
-        z3::check_result verify(
+        void log() override;       
+        Result verify(
             Exp* pre, Exp* post, z3::context *c, z3::solver* s
         ) override;
 };

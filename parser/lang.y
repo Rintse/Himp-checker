@@ -12,11 +12,12 @@
 static void yyerror(const char *);
 void addCom(Node*);
 void addPred(Exp*);
+Node* popBlock(size_t start_line);
 
 extern "C" {
     int yylex(void);
 }
-extern int lineno;
+extern size_t line;
 
 Node* tree = nullptr;
 
@@ -49,6 +50,7 @@ std::stack< std::vector<Exp*> > predStack;
 %union {
   char* str;
   int   nr;
+  size_t line;
   Exp*  exp;
   Node* node;
 }
@@ -57,54 +59,47 @@ std::stack< std::vector<Exp*> > predStack;
 
 Program:        Block { tree = $<node>1; } ;
 
+
 Block:          {   // New block, go deeper into stack 
                     predStack.push(std::vector<Exp*>());
                     comStack.push(std::vector<Node*>());
+                    $<line>$ = line;
                 } 
                 Predicate { addPred($<exp>2); } 
-                ComGen { $<node>$ = $<node>4; } ;
+                ComGen { $<node>$ = popBlock($<line>1); }
+                ;
+
 
 WhileBlock:     {   // New block, go deeper into stack 
                     predStack.push(std::vector<Exp*>());
                     comStack.push(std::vector<Node*>());
+                    $<line>$ = line;
                 } 
-                Command ';' ComGen2 { $<node>$ = $<node>4; } ;
+                Command ';' ComGen2 { $<node>$ = popBlock($<line>1); } ;
+
 
 ComGen2:        Predicate { addPred($<exp>1); } Command ';' 
-                ComGen2 { $<node>$ = $<node>5; }
-                | /* λ */ { // Final statement of block
-                    $<node>$ = new Block(comStack.top(), predStack.top());
-                    comStack.pop();
-                    predStack.pop();
-                }
-                ;
+                ComGen2 { $<node>$ = $<node>5; } | /* λ */ ;
 
-ComGen:         Command 
-                /*  Handled implicity by using a stack in the
-                    Command productions */
-                ';' 
-                Predicate { addPred($<exp>3); } 
-                ComGen { $<node>$ = $<node>5; }
-                | /* λ */ { // Final statement of block
-                    $<node>$ = new Block(comStack.top(), predStack.top());
-                    comStack.pop();
-                    predStack.pop();
-                }
-                ;
+
+ComGen:         Command ';' Predicate { addPred($<exp>3); } 
+                ComGen { $<node>$ = $<node>5; } | /* λ */ ;
+
 
 Command:        Id ASSIGNOP AExp {
-                    addCom(new Assign($<exp>1, $<exp>3));
+                    addCom(new Assign($<exp>1, $<exp>3, line));
                 }
-                | IF BExp THEN Block ELSE Block {
-                    addCom(new IfElse($<exp>2, $<node>4, $<node>6));
+                | { $<line>$ = line; } IF BExp THEN Block ELSE Block {
+                    addCom(new IfElse($<exp>3, $<node>5, $<node>7, $<line>1));
                 }
-                | WHILE BExp Invariant DO WhileBlock {
-                    addCom(new While($<exp>2, $<exp>3, $<node>5));
+                | { $<line>$ = line; } WHILE BExp Invariant DO WhileBlock {
+                    addCom(new While($<exp>3, $<exp>4, $<node>6, $<line>1));
                 }
                 | SKIP {
-                    addCom(new Skip());
+                    addCom(new Skip(line));
                 }
                 ;
+
 
 BExp:           BTRUE           { $<exp>$ = new Bool(true); }
                 | BFALSE        { $<exp>$ = new Bool(false); }
@@ -119,7 +114,8 @@ BExp:           BTRUE           { $<exp>$ = new Bool(true); }
                 }
                 | '(' BExp ')'  { $<exp>$ = $<exp>2; }
                 ;
-  
+
+
 AExp:           Id              { $<exp>$ = $<exp>1; } 
                 | NUM           { $<exp>$ = new Integer($<nr>1); }
                 // Arithmetic operators (seperate due to differing precedences)
@@ -130,16 +126,22 @@ AExp:           Id              { $<exp>$ = $<exp>1; }
                 | '(' AExp ')'  { $<exp>$ = $<exp>2; }
                 ;
 
+
 Predicate:      '{' BExp '}' { $<exp>$ = $<exp>2; } ;
-
 Invariant:      '[' BExp ']' { $<exp>$ = $<exp>2; } ;
-
 Id:             ID { 
                     $<exp>$ = new Var($<str>1); 
                     free($<str>1);
                 };
 
 %%
+
+Node* popBlock(size_t start_line) {
+    Node* tmp = new Block(comStack.top(), predStack.top(), start_line);
+    comStack.pop();
+    predStack.pop();
+    return tmp;
+}
 
 static void yyerror(const char *s)
 {

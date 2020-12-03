@@ -1,14 +1,20 @@
 #include "node.h"
+#include <cstddef>
+#include <iomanip>
 
-Skip::Skip() {}
+Skip::Skip(size_t _line) : Node(_line) {}
 
 Skip::~Skip() {}
 
 void Skip::print(size_t indent) {
-    std::cout << gen_indent(indent) << "skip\n"; 
+    std::cout << gen_indent(indent) << "Skip\n"; 
 }
 
-z3::check_result Skip::verify(
+void Skip::log() {
+    std::cout << std::setw(LOG_WIDTH) << std::left << "Skip"; 
+}
+
+Result Skip::verify(
     Exp* pre, Exp* post, z3::context *c, z3::solver* s
 ) {
     s->push();
@@ -16,10 +22,6 @@ z3::check_result Skip::verify(
     s->add(pre->to_Z3(c));
     s->add(!post->to_Z3(c));
 
-    z3::check_result res = s->check();
-
-    if(res == z3::unsat) s->pop();
-
-    return res;
+    return Result(s).check(this);
 }
 

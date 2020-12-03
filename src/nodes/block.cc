@@ -2,9 +2,11 @@
 #include <cstddef>
 #include <memory>
 #include <list>
+#include <iomanip>
+#include <string>
 
-Block::Block(std::vector<Node*> c, std::vector<Exp*> p)
-: commands(c), predicates(p) {
+Block::Block(std::vector<Node*> c, std::vector<Exp*> p, size_t _line)
+: Node(_line), commands(c), predicates(p) {
     assert(p.size() == c.size() - 1 || c.size() == p.size() - 1);
 }
 
@@ -36,11 +38,16 @@ void Block::print(size_t indent) {
     }
 }
 
+void Block::log() {
+    std::cout << std::setw(LOG_WIDTH) << std::left << 
+    "Block with " + std::to_string(commands.size()) + " commands";
+}
+
 // Verify block statement without pre and postconditions (root of program)
-z3::check_result Block::verify(z3::context *c, z3::solver* s) {
+Result Block::verify(z3::context *c, z3::solver* s) {
     assert(predicates.size() > 0);
     
-    z3::check_result res;
+    Result res(s);
 
     // Loop over hoare triples, verifying each:
     // Block:   p1 c1 p2 c2 p3 c3 p4 ...
@@ -48,10 +55,13 @@ z3::check_result Block::verify(z3::context *c, z3::solver* s) {
     // round2:        |------|
     // round3:              |------|
     for(size_t i = 0; i < commands.size(); i++) {
-        if((res = commands[i]->verify(
-            predicates[i], predicates[i+1], c, s)
-        ) != z3::unsat) {
-            return res;
+        res = commands[i]->verify(
+            predicates[i], predicates[i+1], c, s
+        );
+        if(!(res = commands[i]->verify(
+            predicates[i], predicates[i+1], c, s
+        )).valid()) {
+            return res.log(this);
         }
     }
     
@@ -59,19 +69,19 @@ z3::check_result Block::verify(z3::context *c, z3::solver* s) {
 }
 
 
-z3::check_result Block::verify(
+Result Block::verify(
     Exp* pre, Exp* post, z3::context *c, z3::solver* s
 ) {
     assert(commands.size() > 0);
     
-    z3::check_result res;
+    Result res(s);
 
     std::list<Exp*> preds(predicates.begin(), predicates.end());
     preds.push_front(pre);
     preds.push_back(post);
 
     std::list<Node*> coms(commands.begin(), commands.end());
-    std::unique_ptr<Node> dummy_skip(new Skip);
+    std::unique_ptr<Node> dummy_skip(new Skip(0));
     if(predicates.size() > commands.size()) {
         coms.push_front(dummy_skip.get());
         coms.push_back(dummy_skip.get());
@@ -83,9 +93,9 @@ z3::check_result Block::verify(
         auto _pre = *pred_it;
         auto _post = *(++pred_it);
 
-        if((res = (*com_it)->verify(_pre, _post, c, s)) != z3::unsat)
-            return res;
-       
+        if(!(res = (*com_it)->verify(_pre, _post, c, s)).valid()) {
+            return res.log(this);
+        }
     }
     
     // Only got here if everything before was unsat: 

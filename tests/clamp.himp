@@ -1,0 +1,59 @@
+{ true }
+skip;
+{
+( x >= min or min <= max ) and
+( x < min or (
+    ( x <= max or max >= min ) and
+    ( x > max or x < min ) 
+) )
+}
+skip;
+{
+( x >= min or min <= max ) and
+( x < min or (
+    ( x <= max or max >= min ) and
+    ( x > max or ( x >= min and x <= max ) ) 
+) )
+}
+skip;
+{
+( x >= min or ( min >= min and min <= max ) )
+and
+( x < min or (
+    ( x <= max or ( max >= min and max <= max ) )
+    and
+    ( x > max or ( x >= min and x <= max ) ) 
+) )
+}
+skip;
+{
+( not ( x < min ) or ( min >= min and min <= max ) )
+and
+( not ( not x < min ) or (
+    ( not ( x > max ) or ( max >= min and max <= max ) )
+    and
+    ( not ( not x > max ) or ( x >= min and x <= max ) ) 
+) )
+}
+if x < min then
+    { min >= min and min <= max }
+    y := min;
+    { y >= min and y <= max }
+else
+    { 
+    ( not ( x > max ) or ( max >= min and max <= max ) )
+    and
+    ( not ( not x > max ) or ( x >= min and x <= max ) )
+    }
+    if x > max then
+        { max >= min and max <= max }
+        y := max;
+        { y >= min and y <= max }
+    else
+        { x >= min and x <= max }
+        y := x;
+        { y >= min and y <= max }
+    ;
+    { y >= min and y <= max }
+;
+{ y >= min and y <= max }

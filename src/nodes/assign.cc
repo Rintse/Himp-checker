@@ -1,10 +1,12 @@
 #include "node.h"
+#include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <iomanip>
 #include <z3++.h>
 
-Assign::Assign(Exp* _id, Exp* _aexp)
-: id(_id), aexp(_aexp) {}
+Assign::Assign(Exp* _id, Exp* _aexp, size_t _line)
+: Node(_line), id(_id), aexp(_aexp) {}
 
 Assign::~Assign() {
     delete id;
@@ -16,7 +18,12 @@ void Assign::print(size_t indent) {
     << " := " << aexp->to_string() << std::endl;
 }
 
-z3::check_result Assign::verify(Exp* pre, Exp* post, z3::context *c, z3::solver* s) {
+void Assign::log() {
+    std::cout << std::setw(LOG_WIDTH) << std::left << 
+    id->to_string() + " := " + aexp->to_string();
+}
+
+Result Assign::verify(Exp* pre, Exp* post, z3::context *c, z3::solver* s) {
     std::string id_str = id->to_string();
 
     s->push();
@@ -34,8 +41,5 @@ z3::check_result Assign::verify(Exp* pre, Exp* post, z3::context *c, z3::solver*
         s->add(!post->to_Z3(c));
     }
 
-    z3::check_result res = s->check();
-    if(res == z3::unsat) s->pop();
-
-    return res;
+    return Result(s).check(this);
 }
