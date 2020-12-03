@@ -21,5 +21,6 @@ int main() {
     std::cout << "Verifying correctness..." << std::endl;
     verifyTree(tree);
 
+    delete tree;
     return 0;
 }

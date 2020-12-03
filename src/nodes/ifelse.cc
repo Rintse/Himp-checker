@@ -6,6 +6,12 @@
 IfElse::IfElse(Exp* _bexp, Node* _if_body, Node* _else_body)
 : bexp(_bexp), if_body(_if_body), else_body(_else_body) {}
 
+IfElse::~IfElse() {
+    delete bexp;
+    delete if_body;
+    delete else_body;
+}
+
 void IfElse::print(size_t indent) {
     std::cout << gen_indent(indent) << "If " 
     << bexp->to_string() << " then" << std::endl;

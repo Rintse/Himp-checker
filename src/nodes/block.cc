@@ -8,6 +8,15 @@ Block::Block(std::vector<Node*> c, std::vector<Exp*> p)
     assert(p.size() == c.size() - 1 || c.size() == p.size() - 1);
 }
 
+Block::~Block() {
+    for(auto &com : commands) {
+        delete com;
+    }
+    for(auto &pred : predicates) {
+        delete pred;
+    }
+}
+
 void Block::print(size_t indent) {
     std::cout << gen_indent(indent) << "Block:" << std::endl;
     size_t i;

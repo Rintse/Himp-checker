@@ -6,11 +6,19 @@
 While::While(Exp* _bexp, Exp* inv, Node* _body) 
 : bexp(_bexp), invariant(inv), body(_body) {}
 
+While::~While() {
+    delete bexp;
+    delete invariant;
+    delete body;
+}
+
 void While::print(size_t indent) {
     std::cout << gen_indent(indent) << "While " 
     << bexp->to_string() << " [" << std::endl; 
+    
     printPredicate(invariant, indent+1);
     std::cout << gen_indent(indent) << "] do" << std::endl;
+    
     body->print(indent+1);
 }
 
@@ -34,7 +42,7 @@ z3::check_result While::verify(
     // Verify that the invariant holds after execution of the loop (bexp == false)
     // and that the post condition follows
     std::unique_ptr<Exp> loop_end(
-        new BinaryOp(invariant, OP_AND, new UnaryOp(OP_NEG, bexp->copy()))
+        new BinaryOp(invariant->copy(), OP_AND, new UnaryOp(OP_NEG, bexp->copy()))
     );
     res = dummy_skip->verify(loop_end.get(), post, c, s);
    

@@ -2,6 +2,8 @@
 
 Skip::Skip() {}
 
+Skip::~Skip() {}
+
 void Skip::print(size_t indent) {
     std::cout << gen_indent(indent) << "skip\n"; 
 }

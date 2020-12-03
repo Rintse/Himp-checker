@@ -18,7 +18,6 @@ int yylex(void);
 }
 #endif
 
-int lineno = 1;
 %}
 
 %option nounput
@@ -53,8 +52,7 @@ not             { return NOT; }
                   yylval.str = strdup(yytext); 
                   return ROP; 
                 }
-\n              { lineno++; } //TODO: use in error logging
-[ \t]+          { }
+[ \t]+|"\n"     { /* Eat tabs and enters */ }
 .               { return(yytext[0]); }
 %%
 

@@ -134,13 +134,16 @@ Predicate:      '{' BExp '}' { $<exp>$ = $<exp>2; } ;
 
 Invariant:      '[' BExp ']' { $<exp>$ = $<exp>2; } ;
 
-Id:              ID { $<exp>$ = new Var($<str>1); } ;
+Id:             ID { 
+                    $<exp>$ = new Var($<str>1); 
+                    free($<str>1);
+                };
 
 %%
 
 static void yyerror(const char *s)
 {
-  fprintf(stderr, "line %d: %s\n", lineno, s);
+  fprintf(stderr, "%s", s);
 }
 
 void addCom(Node* command) {

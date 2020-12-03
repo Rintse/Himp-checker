@@ -6,6 +6,11 @@
 Assign::Assign(Exp* _id, Exp* _aexp)
 : id(_id), aexp(_aexp) {}
 
+Assign::~Assign() {
+    delete id;
+    delete aexp;
+}
+
 void Assign::print(size_t indent) {
     std::cout << gen_indent(indent) << id->to_string() 
     << " := " << aexp->to_string() << std::endl;
