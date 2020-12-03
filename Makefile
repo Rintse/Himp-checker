@@ -1,46 +1,48 @@
+# Compilation tools
 LEX				= flex
 YACC			= bison -y -t
-YFLAGS			= --defines --debug --verbose
-PARSE_FLAGS		= -lfl -lm
+CC				= g++
+
+# Directories
 INC_DIR			= include
 SRC_DIR			= src
 MAIN_DIR		= main
 PARSER_DIR		= parser
+
+# Files
 SOURCES			= $(shell find $(SRC_DIR)/ -name '*.cc')
 MAIN_SRC		= $(shell find $(MAIN_DIR)/ -name '*.cc')
 OBJECTS			= $(SOURCES:.cc=.o)
 MAIN_OBJ		= $(MAIN_SRC:.cc=.o)
-DEPS 			= $(OBJECTS:.o=.d)
-MAIN_DEPS		= $(MAIN_OBJ:.o=.d)
 MAIN_TARGET		= h2smt
-CC				= g++
-CFLAGS			= -std=c++11 -g -Wall
+
+#Flags
+CFLAGS			= -std=c++11 -g -Wall -pedantic
+PARSE_FLAGS		= -lfl -lm
 Z3FLAGS			= -lz3
-CPPFLAGS 		= $(addprefix -I, $(INC_DIR)) -pedantic
+YFLAGS			= --defines --debug --verbose
+INCLUDE_FLAGS 	= $(addprefix -I, $(INC_DIR))
 
 
-all: $(MAIN_TARGET)
-
-$(MAIN_TARGET):  $(OBJECTS) $(MAIN_OBJ) parser/par.o parser/lex.o
-	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^ $(PARSE_FLAGS) $(Z3FLAGS)
--include $(MAIN_DEPS) $(DEPS)
+$(MAIN_TARGET):  $(OBJECTS) $(MAIN_OBJ) $(PARSER_DIR)/par.o $(PARSER_DIR)/lex.o
+	$(CC) $(CFLAGS) -o $@ $^ $(PARSE_FLAGS) $(Z3FLAGS)
 
 # PARSER 
-parser/lex.o: parser/lex.c parser/par.h $(OBJECTS)
-parser/par.o: parser/par.c $(OBJECTS)
+$(PARSER_DIR)/lex.o: $(PARSER_DIR)/lex.c $(PARSER_DIR)/par.h $(OBJECTS)
+$(PARSER_DIR)/par.o: $(PARSER_DIR)/par.c $(OBJECTS)
 
-parser/par.h parser/par.c: parser/lang.y
-	$(YACC) $(YFLAGS) $< -o parser/par.c
+$(PARSER_DIR)/par.h $(PARSER_DIR)/par.c: $(PARSER_DIR)/lang.y
+	$(YACC) $(YFLAGS) $< -o $(PARSER_DIR)/par.c
 
-parser/lex.c: parser/lang.l
+$(PARSER_DIR)/lex.c: $(PARSER_DIR)/lang.l
 	$(LEX) -o $@ $<
 
 # Objects
 %.o: %.cc
-	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -o $@ -c $< $(PARSE_FLAGS)
+	$(CC) $(CFLAGS) $(INCLUDE_FLAGS) -o $@ -c $<
 
 clean:
-	rm -f $(OBJECTS) $(MAIN_OBJ) $(DEPS) $(MAIN_DEPS) $(MAIN_TARGET)
-	rm -f parser/par.c parser/par.h parser/lex.c
-	rm -f parser/*.o
-	rm -f parser/par.output
+	rm -f $(OBJECTS) $(MAIN_OBJ) $(MAIN_TARGET)
+	rm -f $(PARSER_DIR)/par.c $(PARSER_DIR)/par.h \
+	$(PARSER_DIR)/lex.c $(PARSER_DIR)/par.output
+	rm -f $(PARSER_DIR)/*.o
