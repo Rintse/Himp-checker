@@ -39,6 +39,7 @@ std::stack< std::vector<Exp*> > predStack;
 %token BTRUE BFALSE SKIP NUM ID
 %left ';' // Sequencing is left associative
 %token ASSIGNOP WHILE DO IF THEN ELSE
+%left IMP // Material implication
 %left OR // Logic or
 %left AND // Logic and
 %left NOT // Logic negation 
@@ -104,8 +105,9 @@ Command:        Id ASSIGNOP AExp {
 BExp:           BTRUE           { $<exp>$ = new Bool(true); }
                 | BFALSE        { $<exp>$ = new Bool(false); }
                 // Boolean operators (seperate due to differing precedences)
-                | BExp AND BExp { $<exp>$ = new BinaryOp($<exp>1, OP_AND, $<exp>3); }
+                | BExp IMP BExp { $<exp>$ = new BinaryOp($<exp>1, OP_IMP, $<exp>3); }
                 | BExp OR BExp  { $<exp>$ = new BinaryOp($<exp>1, OP_OR, $<exp>3); }
+                | BExp AND BExp { $<exp>$ = new BinaryOp($<exp>1, OP_AND, $<exp>3); }
                 | NOT BExp      { $<exp>$ = new UnaryOp(OP_NEG, $<exp>2); }
                 // Relative operators
                 | AExp ROP AExp { 

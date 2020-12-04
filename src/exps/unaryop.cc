@@ -16,7 +16,7 @@ z3::expr UnaryOp::to_Z3(z3::context* c) {
 std::string UnaryOp::to_string() {
     std::string s = "( ";
     switch (op) {
-        case OP_NEG: s += "not "; break;
+        case OP_NEG: s += "¬ "; break;
     }
     return s + child->to_string() + " )";
 }

@@ -1,4 +1,5 @@
 #include "exp.h"
+#include <z3++.h>
 
 BinaryOp::BinaryOp(Exp* c1, BINOP _op, Exp* c2) 
 : op(_op), child1(c1), child2(c2) {}
@@ -19,6 +20,7 @@ z3::expr BinaryOp::to_Z3(z3::context* c) {
         case OP_GT:  return child1->to_Z3(c) >  child2->to_Z3(c);
         case OP_LEQ: return child1->to_Z3(c) <= child2->to_Z3(c);
         case OP_GEQ: return child1->to_Z3(c) >= child2->to_Z3(c);
+        case OP_IMP: return !child1->to_Z3(c) || child2->to_Z3(c);
         default: std::cerr << "Invalid operator" << std::endl;
     }
     return c->string_val("?ERROR?");
@@ -31,14 +33,15 @@ std::string BinaryOp::to_string() {
         case OP_SUB: s += " - ";   break;
         case OP_MUL: s += " * ";   break;
         case OP_DIV: s += " / ";   break;
-        case OP_AND: s += " and "; break;
-        case OP_OR:  s += " or ";  break;
-        case OP_EQ:  s += " == ";  break;
+        case OP_AND: s += " ∧ "; break;
+        case OP_OR:  s += " ∨ ";  break;
+        case OP_EQ:  s += " = ";  break;
         case OP_NEQ: s += " != ";  break;
         case OP_LT:  s += " < ";   break;
         case OP_GT:  s += " > ";   break;
         case OP_LEQ: s += " <= ";  break;
         case OP_GEQ: s += " >= ";  break;
+        case OP_IMP: s += " -> ";  break;
     }
     return s + child2->to_string() + " )";
 }

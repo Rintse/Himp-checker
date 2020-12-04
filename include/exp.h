@@ -11,7 +11,7 @@
 // Binary operators
 enum BINOP {
     OP_ADD, OP_SUB, OP_DIV, OP_MUL,             // arithmetic
-    OP_AND, OP_OR,                              // boolean
+    OP_AND, OP_OR, OP_IMP,                      // boolean
     OP_EQ, OP_NEQ, OP_LT, OP_GT, OP_LEQ, OP_GEQ // relative
 };
 

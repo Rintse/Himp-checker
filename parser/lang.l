@@ -41,14 +41,15 @@ do              { return DO; }
 false           { return BFALSE; } 
 true            { return BTRUE; } 
 skip            { return SKIP; }
-and             { return AND; }
-or              { return OR; }
-not             { return NOT; } 
+and|"∧"         { return AND; }
+or|"∨"          { return OR; }
+not|"¬"         { return NOT; }
+"->"|"→"        { return IMP; }
 ":="            { return ASSIGNOP; }
 {ID}            { yylval.str = strdup(yytext);
                   return ID;
                 }
-"<="|">="|"<"|">"|"=="|"!=" { 
+"<="|">="|"<"|">"|"="|"!=" { 
                   yylval.str = strdup(yytext); 
                   return ROP; 
                 }
