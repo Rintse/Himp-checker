@@ -23,7 +23,7 @@ Node* tree = nullptr;
 
 // Strings to relative operators
 std::map<std::string, BINOP> rops = {
-    {"==", OP_EQ}, {"!=", OP_NEQ}, 
+    {"=", OP_EQ}, {"!=", OP_NEQ}, 
     {"<", OP_LT}, {">", OP_GT},
     {"<=", OP_LEQ}, {">=", OP_GEQ}
 };
