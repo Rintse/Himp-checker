@@ -35,8 +35,8 @@ Result While::verify(
     Result res(s);
 
     // Verify whether the invariant follows from the pre
-    std::unique_ptr<Node> dummy_skip(new Skip(0));
-    if(!(res = dummy_skip->verify(pre, inv, c, s)).valid())
+    std::unique_ptr<Dummy> dummy(new Dummy);
+    if(!(res = dummy->verify(pre, inv, c, s)).valid())
         return res.log(this);
 
     // Verify that the invariant holds during execution of body (bexp == true)
@@ -51,7 +51,7 @@ Result While::verify(
     std::unique_ptr<Exp> loop_end(
         new BinaryOp(inv->copy(), OP_AND, new UnaryOp(OP_NEG, bexp->copy()))
     );
-    if(!(res = dummy_skip->verify(loop_end.get(), post, c, s)).valid())
+    if(!(res = dummy->verify(loop_end.get(), post, c, s)).valid())
         return res.log(this);
 
     return res;

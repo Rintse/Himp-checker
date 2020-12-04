@@ -81,10 +81,10 @@ Result Block::verify(
     preds.push_back(post);
 
     std::list<Node*> coms(commands.begin(), commands.end());
-    std::unique_ptr<Node> dummy_skip(new Skip(0));
+    std::unique_ptr<Dummy> dummy(new Dummy);
     if(predicates.size() > commands.size()) {
-        coms.push_front(dummy_skip.get());
-        coms.push_back(dummy_skip.get());
+        coms.push_front(dummy.get());
+        coms.push_back(dummy.get());
     }
 
     // Check all triples

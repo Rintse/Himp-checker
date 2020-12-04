@@ -10,11 +10,24 @@ Result::Result(z3::solver* s) : solver(s) {
 Result& Result::check(Node* com) {
     res = solver->check(); 
 
-    if(res != z3::unsat) { // error!
+    if(res != z3::unsat) {
+        // Invalid triple: push current command
+        // onto the back_trace and don't pop
+        // the solver to retain counterexample
         back_trace.push(com);
-    } else {
+    } else { 
+        // No error, clear solver
         solver->pop();
     }
+
+    return *this;
+}
+
+Result& Result::check() {
+    res = solver->check();
+    // Dummy check, always pop
+    // never push onto back_trace
+    solver->pop();
 
     return *this;
 }
@@ -25,6 +38,8 @@ Result& Result::log(Node *com) {
 }
 
 bool Result::valid() {
+    // A triple is valid if the solver couldn't find 
+    // counterexamples to the negated post-condition
     return res == z3::unsat;
 }
 
@@ -55,9 +70,7 @@ void Result::print() {
             break;
         case z3::sat:
             std::cout << "Failed to prove hoare triple:" << std::endl;
-
             print_backtrace();
-
             std::cout << "Counterxample:" << std::endl
             << solver->get_model() << std::endl;
             break;

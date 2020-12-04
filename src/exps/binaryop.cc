@@ -48,11 +48,7 @@ bool BinaryOp::contains(std::string to_find) {
 }
 
 Exp* BinaryOp::copy() {
-    return new BinaryOp(
-        child1->copy(), 
-        op, 
-        child2->copy()
-    );
+    return new BinaryOp(child1->copy(), op, child2->copy());
 }
 
 Exp* BinaryOp::substitute(std::string to_sub, std::string sub) {

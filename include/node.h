@@ -1,5 +1,5 @@
-// An collection of nodes to be used in abstract syntax trees for
-// the language "himp"
+// An collection of nodes to be used in abstract 
+// syntax trees for the language "himp"
 
 #ifndef node_h
 #define node_h
@@ -132,6 +132,17 @@ class Skip : public Node {
         void log() override;       
         Result verify(
             Exp* pre, Exp* post, z3::context *c, z3::solver* s
+        ) override;
+};
+
+// Represents an dummy skip, used in 
+class Dummy : public Node {
+    public:
+        Dummy() : Node(0) {}
+        void print(size_t indent) override {}
+        void log() override {}
+        Result verify(
+            Exp *pre, Exp *post, z3::context *c, z3::solver *s
         ) override;
 };
 

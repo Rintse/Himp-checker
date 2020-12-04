@@ -18,7 +18,7 @@ int main() {
     std::cout << "Program:" << std::endl;
     printTree(tree);
 
-    std::cout << "Verifying correctness..." << std::endl;
+    std::cout << "Verifying correctness...\n" << std::endl;
     verifyTree(tree);
 
     delete tree;

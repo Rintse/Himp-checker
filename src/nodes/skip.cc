@@ -25,3 +25,14 @@ Result Skip::verify(
     return Result(s).check(this);
 }
 
+// Don't show existance to the logger
+Result Dummy::verify(
+    Exp* pre, Exp* post, z3::context *c, z3::solver* s
+) {
+    s->push();
+    
+    s->add(pre->to_Z3(c));
+    s->add(!post->to_Z3(c));
+
+    return Result(s).check(/*! no args !*/);
+}
