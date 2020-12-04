@@ -1,14 +1,14 @@
 { n > 0 }
 res := 0;
-{ res = 0 and n > 0 }
+{ res = 0 ∧ n > 0 }
 i := 0;
-{ i = 0 and res = 0 and n > 0 }
+{ i = 0 ∧ res = 0 ∧ n > 0 }
 while i < n [ 
-    res = i*n and i <= n and n > 0
+    res = i*n ∧ i <= n ∧ n > 0
 ] do
     res := res + n;
-    { res = (i+1)*n and i < n and n > 0 }
+    { res = (i+1)*n ∧ i < n ∧ n > 0 }
     i := i + 1;
 ;
-{ res = n*n and i = n and n > 0 }
+{ res = n*n ∧ i = n ∧ n > 0 }
 

@@ -1,33 +1,26 @@
 { min <= max }
 skip;
 {
-( not ( x < min ) or ( min >= min and min <= max ) )
-and
-( not ( not x < min ) or (
-    ( not ( x > max ) or ( max >= min and max <= max ) )
-    and
-    ( not ( not x > max ) or ( x >= min and x <= max ) ) 
-) )
+( x < min -> min >= min ∧ min <= max ) ∧
+( ¬ x < min -> ( ( x > max -> max >= min ∧ max <= max ) ∧ ( ¬ x > max -> x >= min ∧ x <= max ) ) )
 }
 if x < min then
-    { min >= min and min <= max }
+    { min >= min ∧ min <= max }
     y := min;
-    { y >= min and y <= max }
+    { y >= min ∧ y <= max }
 else
     { 
-    ( not ( x > max ) or ( max >= min and max <= max ) )
-    and
-    ( not ( not x > max ) or ( x >= min and x <= max ) )
+    ( x > max -> max >= min ∧ max <= max ) ∧ ( ¬ x > max -> x >= min ∧ x <= max )
     }
     if x > max then
-        { max >= min and max <= max }
+        { max >= min ∧ max <= max }
         y := max;
-        { y >= min and y <= max }
+        { y >= min ∧ y <= max }
     else
-        { x >= min and x <= max }
+        { x >= min ∧ x <= max }
         y := x;
-        { y >= min and y <= max }
+        { y >= min ∧ y <= max }
     ;
-    { y >= min and y <= max }
+    { y >= min ∧ y <= max }
 ;
-{ y >= min and y <= max }
+{ y >= min ∧ y <= max }
