@@ -1,15 +1,32 @@
+// Input: x
+// Output y = x + 1
+// Description: a simple successor function
+
 { true }
+
 skip;
+
 { ( x + 1 - 1 = 0 -> 1 = x + 1) ∧ ( ¬ x + 1 - 1 = 0 -> x + 1 = x + 1 ) }
+
 a := x + 1;
+
 { ( a - 1 = 0 -> 1 = x + 1) ∧ ( ¬ a - 1 = 0 -> a = x + 1 ) }
+
 if a - 1 = 0 then
+
     { x + 1 = 1 }
+    
     y := 1;
+    
     { y = x + 1 }
+
 else
+    
     { a = x + 1 }
+    
     y := a;
+    
     { y = x + 1 }
 ;
+
 { y = x + 1 }

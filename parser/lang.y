@@ -128,7 +128,6 @@ AExp:           Id              { $<exp>$ = $<exp>1; }
                 | '(' AExp ')'  { $<exp>$ = $<exp>2; }
                 ;
 
-
 Predicate:      '{' BExp '}' { $<exp>$ = $<exp>2; } ;
 Invariant:      '[' BExp ']' { $<exp>$ = $<exp>2; } ;
 Id:             ID { 

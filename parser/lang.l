@@ -54,6 +54,7 @@ not|"¬"         { return NOT; }
                   return ROP; 
                 }
 [ \t]+          { /* Eat tabs */ }
+"//".*          { /* Eat comments */ }
 "\n"            { line++; }
 .               { return(yytext[0]); }
 %%

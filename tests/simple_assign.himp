@@ -1,3 +1,9 @@
+// Input: none
+// Output: x = 1
+// Description: A simple test of the assignment rule
+
 { true }
+
 x := 1;
+
 { x = 1 }
