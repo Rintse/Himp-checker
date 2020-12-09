@@ -13,7 +13,7 @@ i := 0;
 { i = 0 ∧ res = 0 ∧ n > 0 }
 
 while i < n [ 
-    res = i*n ∧ i < n ∧ n > 0
+    res = i*n ∧ i <= n ∧ n > 0
 ] do
     
     res := res + n;

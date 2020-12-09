@@ -15,7 +15,7 @@ int main() {
         return 1;
     }
     
-    std::cout << "Program:" << std::endl;
+    std::cout << "Parsing succesfull. Syntax tree:" << std::endl;
     printTree(tree);
 
     std::cout << "Verifying correctness...\n" << std::endl;
