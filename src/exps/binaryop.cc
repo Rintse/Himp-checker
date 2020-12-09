@@ -20,7 +20,7 @@ z3::expr BinaryOp::to_Z3(z3::context* c) {
         case OP_GT:  return child1->to_Z3(c) >  child2->to_Z3(c);
         case OP_LEQ: return child1->to_Z3(c) <= child2->to_Z3(c);
         case OP_GEQ: return child1->to_Z3(c) >= child2->to_Z3(c);
-        case OP_IMP: return !child1->to_Z3(c) || child2->to_Z3(c);
+        case OP_IMP: return z3::implies(child1->to_Z3(c), child2->to_Z3(c));
         default: std::cerr << "Invalid operator" << std::endl;
     }
     return c->string_val("?ERROR?");

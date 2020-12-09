@@ -1,7 +1,11 @@
 #include "result.h"
 #include <cstddef>
+#include <iomanip>
+#include <vector>
 #include <z3++.h>
 #include "node.h"
+
+#define VALUE_WIDTH 20 // Decimal length of 2^64
 
 Result::Result(z3::solver* s) : solver(s) {
     res = z3::unsat; // Default to valid
@@ -63,6 +67,33 @@ void Result::print_backtrace() {
     std::cout << std::endl;
 }
 
+void Result::print_counterexample() {
+    std::vector<std::string> ids;
+    std::vector<z3::expr> values;
+
+    z3::model m = solver->get_model();
+    std::cout << "Counterxample:" << std::endl;
+
+    unsigned longst_name = 0;
+
+    // Gather ids and their values
+    for(unsigned i = 0; i < m.num_consts(); i++) {
+        ids.push_back(m[i]().to_string());
+        values.push_back(m.get_const_interp(m[i]));
+
+        // Keep track of the longest name for pretty printing
+        if(ids.back().length() > longst_name)
+            longst_name = ids.back().length();
+    }
+
+    // Print variables and their values
+    for(size_t i = 0; i < ids.size(); i++) {
+        std::cout
+        << std::setw(longst_name) << std::left << ids[i] << " = " 
+        << std::setw(VALUE_WIDTH) << std::left << values[i] << std::endl;
+    }
+}
+
 void Result::print() {
     switch (res) {
         case z3::unsat:
@@ -71,8 +102,7 @@ void Result::print() {
         case z3::sat:
             std::cout << "Failed to prove hoare triple:" << std::endl;
             print_backtrace();
-            std::cout << "Counterxample:" << std::endl
-            << solver->get_model() << std::endl;
+            print_counterexample();
             break;
         default:
             std::cout << "Could not prove correctness" << std::endl;

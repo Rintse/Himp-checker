@@ -27,6 +27,7 @@ class Result {
 
         bool valid();
         void print_backtrace();
+        void print_counterexample();
         
         // Prints the validness of the result, 
         // and a back_trace if the result is invalid

@@ -75,11 +75,13 @@ Result Block::verify(
     assert(commands.size() > 0);
     
     Result res(s);
-
+    
+    // Extend predicates: pre . predicates . post
     std::list<Exp*> preds(predicates.begin(), predicates.end());
     preds.push_front(pre);
     preds.push_back(post);
 
+    // If this is not a while block, also add dummy skips: skip . commands . skip
     std::list<Node*> coms(commands.begin(), commands.end());
     std::unique_ptr<Dummy> dummy(new Dummy);
     if(predicates.size() > commands.size()) {
