@@ -10,7 +10,7 @@ The language accepted is as follows:
 >  | *Aexp* * *Aexp* \
 >  | *Aexp* / *Aexp*
   
->*Bexp &rarr; ***true*** | ***false*** 
+>*Bexp &rarr; ***true*** | ***false*** \
 >  | *Bexp* = *Bexp* \
 >  | *Bexp* &ne; *Bexp* \
 >  | *Bexp* > Bexp \
@@ -22,7 +22,8 @@ The language accepted is as follows:
 >  | *Bexp* &#8744; *Bexp* \
 >  | *Bexp* &rArr; *Bexp*
   
->Command &rarr; ***skip*** | *var* := *Aexp* \
+>Command &rarr; ***skip*** \
+>  | *var* := *Aexp* \
 >  | ***if*** *Bexp* ***then*** *Block* ***else*** *Block* \
 >  | ***while*** *Bexp* ***do*** *WhileBlock*
   
