@@ -4,30 +4,28 @@ This program can parse, and verify hoare proofs within an [imp-like](https://en.
 ## Grammar
 The language accepted is as follows: 
 
-$x = 1$
-
 >*Aexp* &rarr; *var* | *int* \
->  | *Aexp* + *Aexp* \
->  | *Aexp* - *Aexp* \
->  | *Aexp* * *Aexp* \
->  | *Aexp* / *Aexp*
+>&nbsp;&nbsp;  | *Aexp* + *Aexp* \
+>&nbsp;&nbsp;  | *Aexp* - *Aexp* \
+>&nbsp;&nbsp;  | *Aexp* * *Aexp* \
+>&nbsp;&nbsp;  | *Aexp* / *Aexp*
   
 >*Bexp &rarr; ***true*** | ***false*** \
->  | *Bexp* = *Bexp* \
->  | *Bexp* &ne; *Bexp* \
->  | *Bexp* > Bexp \
->  | *Bexp* < *Bexp* \
->  | *Bexp* &ge; *Bexp* \
->  | *Bexp* &le; *Bexp* \
->  | &not; *Bexp* \
->  | *Bexp* &#8743; *Bexp* \
->  | *Bexp* &#8744; *Bexp* \
->  | *Bexp* &rArr; *Bexp*
+>&nbsp;&nbsp;  | *Bexp* = *Bexp* \
+>&nbsp;&nbsp;  | *Bexp* &ne; *Bexp* \
+>&nbsp;&nbsp;  | *Bexp* > Bexp \
+>&nbsp;&nbsp;  | *Bexp* < *Bexp* \
+>&nbsp;&nbsp;  | *Bexp* &ge; *Bexp* \
+>&nbsp;&nbsp;  | *Bexp* &le; *Bexp* \
+>&nbsp;&nbsp;  | &not; *Bexp* \
+>&nbsp;&nbsp;  | *Bexp* &#8743; *Bexp* \
+>&nbsp;&nbsp;  | *Bexp* &#8744; *Bexp* \
+>&nbsp;&nbsp;  | *Bexp* &rArr; *Bexp*
   
 >Command &rarr; ***skip*** \
->  | *var* := *Aexp* \
->  | ***if*** *Bexp* ***then*** *Block* ***else*** *Block* \
->  | ***while*** *Bexp* ***do*** *WhileBlock*
+>&nbsp;&nbsp;  | *var* := *Aexp* \
+>&nbsp;&nbsp;  | ***if*** *Bexp* ***then*** *Block* ***else*** *Block* \
+>&nbsp;&nbsp;  | ***while*** *Bexp* ***do*** *WhileBlock*
   
 >*Block* &rarr; ( { *Bexp* } *Command*; )* { *Bexp* } \
 >*WhileBlock* &rarr; ( *Command* { *Bexp* } )* *Command*
