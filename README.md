@@ -4,6 +4,8 @@ This program can parse, and verify hoare proofs within an [imp-like](https://en.
 ## Grammar
 The language accepted is as follows: 
 
+$x = 1$
+
 >*Aexp* &rarr; *var* | *int* \
 >  | *Aexp* + *Aexp* \
 >  | *Aexp* - *Aexp* \
