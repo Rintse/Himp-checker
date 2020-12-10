@@ -3,7 +3,6 @@ This program can parse, and verify hoare proofs within an [imp-like](https://en.
 
 ## Grammar
 The language accepted is as follows:
----
 Aexp &rarr; var | int | Aexp + Aexp | 
   Aexp - Aexp | Aexp * Aexp | Aexp / Aexp
   
@@ -19,4 +18,3 @@ Command &rarr; **skip** | var := Aexp |
   
 Block &rarr; ( { Bexp } Command; )* { Bexp }
 WhileBlock &rarr; ( Command { Bexp } )* Command
----
