@@ -1,5 +1,5 @@
 # h2smt
-This program can parse, and verify hoare proofs within an [imp-like](https://en.wikipedia.org/wiki/IMP_(programming_language)) language.
+This program can parse, and verify hoare proofs of an [imp-like](https://en.wikipedia.org/wiki/IMP_(programming_language)) language.
 
 ## Overview
 Imp-like programs, annotated with hoare predicates, are parsed into an AST using flex and bison.
