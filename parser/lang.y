@@ -17,10 +17,10 @@ Node* popBlock(size_t start_line);
 extern "C" {
     int yylex(void);
 }
+// Current line number
 extern size_t line;
-
+// AST
 Node* tree = nullptr;
-
 // Strings to relative operators
 std::map<std::string, BINOP> rops = {
     {"=", OP_EQ}, {"!=", OP_NEQ}, 
@@ -28,32 +28,33 @@ std::map<std::string, BINOP> rops = {
     {"<=", OP_LEQ}, {">=", OP_GEQ}
 };
 
+// Store the commands in nested block statements
 std::stack< std::vector<Node*> > comStack;
+// Store the predicates in nested block statements
 std::stack< std::vector<Exp*> > predStack;
 
 %}
 
-/* Start symbol */
-%start Program
-
+// Tokens
+%start Program // Start symbol
 %token BTRUE BFALSE SKIP NUM ID
 %left ';' // Sequencing is left associative
 %token ASSIGNOP WHILE DO IF THEN ELSE
-%left IMP // Material implication
-%left OR // Logic or
-%left AND // Logic and
-%left NOT // Logic negation 
-%token ROP // Relative operator
-%left '+' '-' // Arithmetic
-%left '*' '/' // Arithmetic
+%left IMP       // Material implication
+%left OR        // Logic or
+%left AND       // Logic and
+%left NOT       // Logic negation 
+%token ROP      // Relative operator
+%left '+' '-'   // Arithmetic
+%left '*' '/'   // Arithmetic
 
 /* Types to pass between lexer, rules and actions */
 %union {
-  char* str;
-  int   nr;
-  size_t line;
-  Exp*  exp;
-  Node* node;
+  char* str;    // IDs
+  int   nr;     // Number values
+  size_t line;  // Line numbers
+  Exp*  exp;    // Expressions
+  Node* node;   // Nodes
 }
 
 %% 
@@ -137,16 +138,12 @@ Id:             ID {
 
 %%
 
+// Pops the stacks after the end of a block statement is found
 Node* popBlock(size_t start_line) {
     Node* tmp = new Block(comStack.top(), predStack.top(), start_line);
     comStack.pop();
     predStack.pop();
     return tmp;
-}
-
-static void yyerror(const char *s)
-{
-  fprintf(stderr, "%s", s);
 }
 
 void addCom(Node* command) {
@@ -155,6 +152,11 @@ void addCom(Node* command) {
 
 void addPred(Exp* predicate) {
     predStack.top().push_back(predicate);
+}
+
+static void yyerror(const char *s)
+{
+  fprintf(stderr, "%s", s);
 }
 
 int yywrap()

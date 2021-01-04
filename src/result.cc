@@ -15,9 +15,8 @@ Result& Result::check(Node* com) {
     res = solver->check(); 
 
     if(res != z3::unsat) {
-        // Invalid triple: push current command
-        // onto the back_trace and don't pop
-        // the solver to retain counterexample
+        // Invalid triple: push current command onto the back_trace 
+        // and don't pop the solver to retain access to counterexample
         back_trace.push(com);
     } else { 
         // No error, clear solver

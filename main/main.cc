@@ -6,7 +6,9 @@
 int yyparse();
 int yylex_destroy();
 
+/* The AST */
 extern Node* tree;
+
 
 int main() {
     yyparse();

@@ -27,7 +27,7 @@ LETTER  [a-zA-Z]
 DIGIT   [0-9]
 ID      {LETTER}({LETTER}|{DIGIT})*
 NUM     -?({DIGIT}{DIGIT}*)
-
+RELOP   "<="|">="|"<"|">"|"="|"!=" 
 
 %%
 {NUM}           { yylval.nr = std::stoi(yytext, NULL, 10);
@@ -49,8 +49,7 @@ not|"¬"         { return NOT; }
 {ID}            { yylval.str = strdup(yytext);
                   return ID;
                 }
-"<="|">="|"<"|">"|"="|"!=" { 
-                  yylval.str = strdup(yytext); 
+{RELOP}         { yylval.str = strdup(yytext); 
                   return ROP; 
                 }
 [ \t]+          { /* Eat tabs */ }
