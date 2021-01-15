@@ -2,11 +2,11 @@
 // Output: none
 // Description: simply tests implication over skip statements
 
-{ not x <= 0 ∧ y == 3 }
+{ ¬ x <= 0 ∧ y = 3 }
 
 skip;
 
-{ not x <= -1 ∧ y = 3 }
+{ ¬ x <= -1 ∧ y = 3 }
 
 skip;
 

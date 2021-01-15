@@ -6,7 +6,7 @@ Imp-like programs, annotated with hoare predicates, are parsed into an AST using
 
 The AST is then traversed in accordance with the common hoare rules to verify the correctness of the annotated program.
 
-Hoare triples are translated into SMT formulas, as described [here](https://fmt.ewi.utwente.nl/media/71.pdf), which are then verified using the [Z3 SMT prover](https://github.com/Z3Prover/z3). Using this translation scheme, counterexamples to the hoare proof can be extracted from the SMT model if the hoare proof turns out to be invalid.
+Hoare triples are translated into SMT formulas, as described [here](https://fmt.ewi.utwente.nl/media/71.pdf), which are then verified using the [Z3 SMT prover](https://github.com/Z3Prover/z3). Using this translation scheme, counterexamples to the hoare proof are extracted from the SMT model and presented to the user if the hoare proof turns out to be invalid.
 
 ## Grammar
 The accepted language is as follows: 

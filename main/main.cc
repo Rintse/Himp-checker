@@ -14,7 +14,7 @@ int main() {
     yyparse();
 
     if(tree == nullptr) {
-        return 1;
+        return 1; // Parsing failed
     }
     
     std::cout << "Parsing succesfull. Syntax tree:" << std::endl;

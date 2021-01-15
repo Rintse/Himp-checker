@@ -1,3 +1,4 @@
+// Implementation of the binary AST nodes
 #include "exp.h"
 #include <z3++.h>
 
@@ -29,19 +30,19 @@ z3::expr BinaryOp::to_Z3(z3::context* c) {
 std::string BinaryOp::to_string() {
     std::string s = "( " + child1->to_string();
     switch (op) {
-        case OP_ADD: s += " + ";   break;
-        case OP_SUB: s += " - ";   break;
-        case OP_MUL: s += " * ";   break;
-        case OP_DIV: s += " / ";   break;
-        case OP_AND: s += " ∧ "; break;
-        case OP_OR:  s += " ∨ ";  break;
-        case OP_EQ:  s += " = ";  break;
-        case OP_NEQ: s += " != ";  break;
-        case OP_LT:  s += " < ";   break;
-        case OP_GT:  s += " > ";   break;
-        case OP_LEQ: s += " <= ";  break;
-        case OP_GEQ: s += " >= ";  break;
-        case OP_IMP: s += " -> ";  break;
+        case OP_ADD: s += " + ";    break;
+        case OP_SUB: s += " - ";    break;
+        case OP_MUL: s += " * ";    break;
+        case OP_DIV: s += " / ";    break;
+        case OP_AND: s += " ∧ ";    break;
+        case OP_OR:  s += " ∨ ";    break;
+        case OP_EQ:  s += " = ";    break;
+        case OP_NEQ: s += " != ";   break;
+        case OP_LT:  s += " < ";    break;
+        case OP_GT:  s += " > ";    break;
+        case OP_LEQ: s += " <= ";   break;
+        case OP_GEQ: s += " >= ";   break;
+        case OP_IMP: s += " -> ";   break;
     }
     return s + child2->to_string() + " )";
 }

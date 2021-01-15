@@ -1,5 +1,7 @@
+// Implementations of the various AST leaf nodes
 #include "exp.h"
 
+// Integers
 Integer::Integer(int i) : val(i) {}
 
 z3::expr Integer::to_Z3(z3::context* c) {
@@ -23,6 +25,7 @@ Exp* Integer::substitute(std::string to_sub, std::string sub) {
 }
 
 
+// Bools
 Bool::Bool(bool b) : val(b) {}
 
 z3::expr Bool::to_Z3(z3::context *c) {
@@ -46,6 +49,7 @@ Exp* Bool::substitute(std::string to_find, std::string replacement) {
 }
 
 
+// Variables
 Var::Var(std::string _id) : id(_id) {}
 
 z3::expr Var::to_Z3(z3::context *c) {
